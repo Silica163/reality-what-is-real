@@ -1,5 +1,5 @@
 const { mat4, mat3, mat2, quat, quat2, vec2, vec3, vec4} = glMatrix;
-const { abs, sign, max, sqrt, min, floor } = Math;
+const { PI, abs, sign, max, sqrt, min, floor } = Math;
 function max3(v){
     return max(v[0],max(v[1],v[2]));
 }
@@ -14,23 +14,30 @@ let mouse = {x:0,y:0};
 const mouseSpeed = .7;
 let moveSpeed = .025;
 const movement = {x:0,y:0,z:0};
+const lookAngle = {lr:0,ud:0};
 const gameState = {
     roomId: 0,
-    jump: 0,
 }
+const cameraSettings  = {
+    first_player: true,
+    third_player_dist: .4,
+    FOV: PI/1.7,
+    aspect: canvas.width/canvas.height,
+    zNear: 0.1,
+    zFar: 20,
+}
+
 let lightPos = vec3.fromValues(0,3,0);
-let posOffset = vec3.fromValues(0,0,0);
-const FOV = Math.PI/1.7;
-const aspect = canvas.width/canvas.height;
-const zNear = 0.1;
-const zFar = 10;
+
 const projMat = mat4.create();
-mat4.perspective(projMat, FOV, aspect, zNear, zFar);
+mat4.perspective(
+    projMat, 
+    cameraSettings.FOV, 
+    cameraSettings.aspect, 
+    cameraSettings.zNear, 
+    cameraSettings.zFar
+);
 
-let first_player = true;
-let thirdCamDist = .4;
-
-let lookAngle = {lr:0,ud:0};
 let lookDir = vec3.fromValues(0,0,-1);
 
 let viewCamPos = vec3.fromValues(0,0,0);
@@ -40,13 +47,13 @@ const invCamRot = mat4.invert([0],camRotMat);
 const camDirMovement = vec3.fromValues(0,0,0);
 
 const modelViewMat = mat4.create();
+vec3.copy(viewCamPos, worldCamPos);
 mat4.translate(
     modelViewMat,
     camRotMat,
-    vec3.negate([0],worldCamPos)
+    vec3.negate([0],viewCamPos),
 );
 
-const PI = Math.PI;
 let pointerLock = false;
 let enableLock = false;
 let intOffset = 0; 

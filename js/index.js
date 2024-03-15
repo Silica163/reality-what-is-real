@@ -72,42 +72,22 @@ for(let i in shaderProgs){
 }
 
 function drawFrame(time){
-
-    // rotate camera
-    vec3.rotateX(lookDir,[0,0,-1],[0,0,0],lookAngle.ud);
-    vec3.rotateY(lookDir,lookDir,[0,0,0],lookAngle.lr);    
-    mat4.lookAt(camRotMat,[0,0,0],lookDir,[0,1,0]);
-
-    mat4.invert(invCamRot,camRotMat);
-
-    if(first_player){
-        viewCamPos = worldCamPos;
-    } else {
-        viewCamPos = vec3.add([0],worldCamPos,vec3.scale([0],lookDir,-thirdCamDist));
-    }
-
-    mat4.translate(
-        modelViewMat,
-        camRotMat,
-        vec3.negate([0],viewCamPos)
-    );
+    let inverseColor = (gameState.roomId > 7) * 1;
 
     clearBuffer();
     for(let i in shaderProgs){
-        if(i == "camera" && first_player){
+        if(i == "camera" && cameraSettings.first_player){
             continue;
         } else {
             const camVPos = cubeVertex(worldCamPos,[.1,.1,.1]);
             glContext.bindBuffer(glContext.ARRAY_BUFFER, cameraVBuff);
             glContext.bufferData(glContext.ARRAY_BUFFER, new Float32Array(camVPos.flat()), glContext.STATIC_DRAW);
-
         }
 
         let cubeId = -1.;
         if(i.match(/cubeProg/) != null){
             cubeId = Number(i[8]);
         }
-        let inverseColor = (gameState.roomId > 7) * 1;
 
         let currentProgram = shaderProgs[i];
         glContext.useProgram(currentProgram);
@@ -160,7 +140,7 @@ function render(time){
     vec3.add(worldCamPos,worldCamPos,camDirMovement);
 
 
-    intOffset = first_player ? .2 : .1;
+    intOffset = cameraSettings.first_player ? .2 : .1;
     var roomInt = isPointInsideBox(worldCamPos, room.b, intOffset);
     var cubeInts = [];
 
@@ -238,6 +218,25 @@ function render(time){
             }
         }
     }
+
+    // rotate camera
+    vec3.rotateX(lookDir,[0,0,-1],[0,0,0],lookAngle.ud);
+    vec3.rotateY(lookDir,lookDir,[0,0,0],lookAngle.lr);    
+    mat4.lookAt(camRotMat,[0,0,0],lookDir,[0,1,0]);
+
+    mat4.invert(invCamRot,camRotMat);
+
+    if(cameraSettings.first_player){
+        viewCamPos = worldCamPos;
+    } else {
+        viewCamPos = vec3.add([0],worldCamPos,vec3.scale([0],lookDir,-cameraSettings.third_player_dist));
+    }
+
+    mat4.translate(
+        modelViewMat,
+        camRotMat,
+        vec3.negate([0],viewCamPos)
+    );
 
     drawFrame(time);
     window.requestAnimationFrame(render);

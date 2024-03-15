@@ -30,7 +30,7 @@ function moveCamera(e){
                 break ;
         }
 
-        if(e.code == "KeyV" && e.type == "keyup")first_player = !first_player;
+        if(e.code == "KeyV" && e.type == "keyup")cameraSettings.first_player = !cameraSettings.first_player;
         if(e.code == "KeyM" && e.type == "keyup")enableLock = !enableLock;
         if(e.code == "KeyR" && e.type == "keyup"){
             worldCamPos[0] = 0;
