@@ -12,64 +12,69 @@ const cubes = [
         p:[-.6, .2,-.6],
     },
 ];
-const shaderProgs = {};
-
-const cameraProg = glContext.createProgram();
-attachShader(glContext, cameraProg, vShaderSource, cameraFSource);
-linkProgram(glContext, cameraProg);
-shaderProgs.camera = cameraProg;
-
-const roomProg = glContext.createProgram();
-attachShader(glContext, roomProg, vShaderSource, roomFSource);
-linkProgram(glContext, roomProg);
-shaderProgs.roomProg = roomProg;
-
-for(let i in cubes){
-    const cubeProg = glContext.createProgram();
-    attachShader(glContext, cubeProg, vShaderSource, cubeFSource);
-    linkProgram(glContext, cubeProg);
-    shaderProgs[`cubeProg${i}`] = cubeProg;
-
-    const cubeSize = [.2,.2,.2];
-    const cubeVBuff = glContext.createBuffer();
-    const cubeVPos = cubeVertex(cubes[i].p,cubeSize);
-    cubes[i].s = cubeSize;
-    cubes[i].b = cubeEdge(cubes[i].p,cubeSize);
-    glContext.bindBuffer(glContext.ARRAY_BUFFER, cubeVBuff);
-    glContext.bufferData(glContext.ARRAY_BUFFER, new Float32Array(cubeVPos.flat()), glContext.STATIC_DRAW);
-    shaderProgs[`cubeProg${i}`].vBuff = cubeVBuff;
-}
 
 const room = {
     p:[0,2,0],
     s:[2,2,2],
 }
-const roomVBuff = glContext.createBuffer();
-const roomVPos = cubeVertex(room.p,room.s);
-room.b = cubeEdge(room.p,room.s);
-glContext.bindBuffer(glContext.ARRAY_BUFFER, roomVBuff);
-glContext.bufferData(glContext.ARRAY_BUFFER, new Float32Array(roomVPos.flat()), glContext.STATIC_DRAW);
-shaderProgs["roomProg"].vBuff = roomVBuff;
-
-const cameraVBuff = glContext.createBuffer();
-shaderProgs["camera"].vBuff = cameraVBuff;
-
-for(let i in shaderProgs){
-    let currentProgram = shaderProgs[i];
-    getUniform(currentProgram, "worldCamPos");
-    getUniform(currentProgram, "viewCamPos");
-    getUniform(currentProgram, "time");
-    getUniform(currentProgram, "resolution");
-    getUniform(currentProgram, "uProjMat");
-    getUniform(currentProgram, "uViewMat");
-    getUniform(currentProgram, "invCamRot");
-    getUniform(currentProgram, "lightPos");
-    getUniform(currentProgram, "roomData");
-
-    getAttrib(currentProgram, "aWorldVextexPos");
-    getAttrib(currentProgram, "aSurfNormal");
-    getAttrib(currentProgram, "aTexCoord");
+const shaderProgs = {};
+let cameraVBuff;
+function createRenderProgram(gl, name, vertexShaderName, fragmentShaderName){
+    const program = gl.createProgram();
+    attachShader(gl, program, shaders[vertexShaderName], shaders[fragmentShaderName]);
+    linkProgram(gl, program);
+    shaderProgs[name] = program;
+    return program;
 }
+
+window.addEventListener("shaderloaded",()=>{
+
+    createRenderProgram(glContext, "camera", "vShaderSource", "cameraFSource");
+    createRenderProgram(glContext, "roomProg", "vShaderSource", "roomFSource");
+
+    for(let i in cubes){
+        createRenderProgram(glContext, `cubeProg${i}`, "vShaderSource", "cubeFSource");
+
+        const cubeSize = [.2,.2,.2];
+        const cubeVBuff = glContext.createBuffer();
+        const cubeVPos = cubeVertex(cubes[i].p,cubeSize);
+        cubes[i].s = cubeSize;
+        cubes[i].b = cubeEdge(cubes[i].p,cubeSize);
+        glContext.bindBuffer(glContext.ARRAY_BUFFER, cubeVBuff);
+        glContext.bufferData(glContext.ARRAY_BUFFER, new Float32Array(cubeVPos.flat()), glContext.STATIC_DRAW);
+        shaderProgs[`cubeProg${i}`].vBuff = cubeVBuff;
+    }
+
+    const roomVBuff = glContext.createBuffer();
+    const roomVPos = cubeVertex(room.p,room.s);
+    room.b = cubeEdge(room.p,room.s);
+    glContext.bindBuffer(glContext.ARRAY_BUFFER, roomVBuff);
+    glContext.bufferData(glContext.ARRAY_BUFFER, new Float32Array(roomVPos.flat()), glContext.STATIC_DRAW);
+    shaderProgs["roomProg"].vBuff = roomVBuff;
+
+    cameraVBuff = glContext.createBuffer();
+    shaderProgs["camera"].vBuff = cameraVBuff;
+
+    for(let i in shaderProgs){
+        let currentProgram = shaderProgs[i];
+        getUniform(currentProgram, "worldCamPos");
+        getUniform(currentProgram, "viewCamPos");
+        getUniform(currentProgram, "time");
+        getUniform(currentProgram, "resolution");
+        getUniform(currentProgram, "uProjMat");
+        getUniform(currentProgram, "uViewMat");
+        getUniform(currentProgram, "invCamRot");
+        getUniform(currentProgram, "lightPos");
+        getUniform(currentProgram, "roomData");
+
+        getAttrib(currentProgram, "aWorldVextexPos");
+        getAttrib(currentProgram, "aSurfNormal");
+        getAttrib(currentProgram, "aTexCoord");
+    }
+
+    window.requestAnimationFrame(render);
+
+});
 
 function drawFrame(time){
     let inverseColor = (gameState.roomId > 7) * 1;
@@ -241,4 +246,6 @@ function render(time){
     drawFrame(time);
     window.requestAnimationFrame(render);
 }
-window.requestAnimationFrame(render);
+//window.requestAnimationFrame(render);
+
+loadUrlShaders();

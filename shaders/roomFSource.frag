@@ -1,42 +1,5 @@
-const vertexShaderList = [
-    "vShaderSource",
-];
-const fragmentShaderList = [
-    "cubeFSource",
-    "roomFSource",
-    "cameraFSource"
-];
+precision highp float;
 
-const shaders = {};
-let shaderLoaded = 0;
-const shaderLoadedEvent = new CustomEvent("shaderloaded");
-
-function loadUrlShader(url, shaderName){
-    function fetchErr(e){
-        console.warn(url, e);
-    }
-    fetch(url).then((stream) => {
-        stream.text().then((texts)=>{
-            shaders[shaderName] = texts;
-            shaderLoaded++;
-            if(shaderLoaded == (vertexShaderList.length + fragmentShaderList.length)){
-                window.dispatchEvent(shaderLoadedEvent);
-            }
-        }).catch(fetchErr);
-    }).catch(fetchErr);
-}
-
-function loadUrlShaders(){
-    for(let i of vertexShaderList){
-        loadUrlShader(`./shaders/${i}.vert`,i);
-    }
-    for(let i of fragmentShaderList){
-        loadUrlShader(`./shaders/${i}.frag`,i);
-    }
-
-}
-
-let shaderHeader = `
 uniform mat4 invCamRot;
 uniform mat4 uViewMat;
 uniform mat4 uProjMat;
@@ -53,9 +16,7 @@ varying vec3 surfNormal;
 varying vec3 surfPos;
 varying vec3 tmp;
 varying vec2 vUv;
-`;
 
-let commonFShader = `
 float arrow(vec2 uv){
     float c = 0.;
     uv.x = abs(uv.x);
@@ -85,75 +46,6 @@ float phong(vec3 N, vec3 L, vec3 V, float k){
     vec3 H = normalize(N-V);
     return pow(diffuse(H,L),k);
 }
-`;
-
-let vShaderSource = `
-precision highp float;
-
-attribute vec4 aWorldVertexPos;
-attribute vec3 aSurfNormal;
-attribute vec2 aTexCoord;
-
-${shaderHeader}
-
-void main(){
-    gl_Position = uProjMat * uViewMat* aWorldVertexPos;
-    vWorldPos = aWorldVertexPos;
-    vScreenPos = gl_Position;
-    surfNormal = aSurfNormal;
-    vUv = aTexCoord;
-}
-`;
-
-let cubeFSource =`
-precision highp float;
-
-${shaderHeader}
-${commonFShader}
-
-vec3 V = vec3(0);
-vec3 L = vec3(0);
-vec3 N = vec3(0);
-
-float cubeId = 0.;
-float roomNum = 0.;
-
-vec4 float24bit(float a){
-    vec4 ret = vec4(0);
-    ret.x = mod(floor(a/8.),2.);
-    ret.y = mod(floor(a/4.),2.);
-    ret.z = mod(floor(a/2.),2.);
-    ret.a = mod(a,2.);
-    return ret;
-}
-
-void main(){
-    V = normalize(vWorldPos.xyz - viewCamPos);
-    L = normalize(lightPos - vWorldPos.xyz);
-    N = surfNormal;
-    cubeId = roomData.y;
-    roomNum = roomData.x;
-    vec4 fourBit = float24bit(mod(roomNum,16.));
-    float c = 0.;
-    if(cubeId == 0.)
-        c = fourBit.x;
-    if(cubeId == 1. )
-        c = fourBit.y;
-    if(cubeId == 2. )
-        c = fourBit.z;
-    if(cubeId == 3. )
-        c = fourBit.w;
-    c += (blinnPhong(N,L,V,1.) + .05)*.2;
-    gl_FragColor = vec4(vec3(c),1);
-}
-`;
-
-let roomFSource = `
-precision highp float;
-
-${shaderHeader}
-${commonFShader}
-
 #define MAX 10.
 #define MIN .00001
 #define STEPS 128
@@ -258,48 +150,3 @@ void main(){
     }
     gl_FragColor = vec4(c,1);
 }
-`;
-
-let cameraFSource = `
-precision highp float;
-
-${shaderHeader}
-${commonFShader}
-
-#define STEPS 32
-#define MAX 10.
-#define MIN .0001
-vec3 V = vec3(0);
-vec3 L = vec3(0);
-vec3 N = vec3(0);
-void main(){
-    N = surfNormal;
-    V = normalize(vWorldPos.xyz - viewCamPos);
-    
-    vec3 rp = vWorldPos.xyz;
-    float rl = length(rp - viewCamPos);
-    for(int i = 0; i < STEPS; i++){
-        float d = length(rp - worldCamPos) - .1;
-        if(d > MAX){
-            discard;
-            break;
-        }
-        if(d <= MIN){
-            break;
-        }
-        rl += d;
-        rp = viewCamPos + V * rl;
-    }
-
-    L = normalize(lightPos - rp);
-    V = normalize(rp - viewCamPos);
-    N = normalize(rp - worldCamPos);
-    
-    float c = 0.;
-    c += diffuse(N,L);
-    c += phong(N,L,V,32.);
-    c = c/3. + .3;
-
-    gl_FragColor = vec4(vec3(c),1);
-}
-`;
