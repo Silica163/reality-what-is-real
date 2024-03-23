@@ -17,6 +17,7 @@ const movement = {x:0,y:0,z:0};
 const lookAngle = {lr:0,ud:0};
 const gameState = {
     roomId: 0,
+    room16: 1,
 }
 const cameraSettings  = {
     first_player: true,

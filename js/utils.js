@@ -49,3 +49,13 @@ function clearBuffer(){
     glContext.clear(glContext.COLOR_BUFFER_BIT | glContext.DEPTH_BUFFER_BIT);
 }
 
+const shaderProgs = {};
+function createRenderProgram(gl, name, vertexShaderName, fragmentShaderName){
+    const program = gl.createProgram();
+    attachShader(gl, program, shaders[vertexShaderName], shaders[fragmentShaderName]);
+    linkProgram(gl, program);
+    shaderProgs[name] = program;
+    return program;
+}
+
+

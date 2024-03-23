@@ -17,20 +17,29 @@ const room = {
     p:[0,2,0],
     s:[2,2,2],
 }
-const shaderProgs = {};
-let cameraVBuff;
-function createRenderProgram(gl, name, vertexShaderName, fragmentShaderName){
-    const program = gl.createProgram();
-    attachShader(gl, program, shaders[vertexShaderName], shaders[fragmentShaderName]);
-    linkProgram(gl, program);
-    shaderProgs[name] = program;
-    return program;
-}
 
-window.addEventListener("shaderloaded",()=>{
-
+function gameStart(){
     createRenderProgram(glContext, "camera", "vShaderSource", "cameraFSource");
     createRenderProgram(glContext, "roomProg", "vShaderSource", "roomFSource");
+    createRenderProgram(glContext, "room16", "room16v", "room16f");
+
+    const frontCamPlane = glContext.createBuffer();
+    const frontPlane = glContext.createBuffer();
+    shaderProgs['room16'].vBuff = frontCamPlane;
+    shaderProgs["room16"].eBuff = frontPlane;
+    const planeVert = [
+         2, 2,-.5,
+        -2, 2,-.5,
+        -2,-2,-.5,
+         2,-2,-.5
+    ];
+    const planeConn = [0,1,2,0,2,3];
+    shaderProgs['room16'].eLength = planeConn.length;
+    glContext.bindBuffer(glContext.ARRAY_BUFFER, frontCamPlane);
+    glContext.bufferData(glContext.ARRAY_BUFFER, new Float32Array(planeVert), glContext.STATIC_DRAW);
+    glContext.bindBuffer(glContext.ELEMENT_ARRAY_BUFFER, frontPlane);
+    glContext.bufferData(glContext.ELEMENT_ARRAY_BUFFER, new Uint16Array(planeConn), glContext.STATIC_DRAW);
+
 
     for(let i in cubes){
         createRenderProgram(glContext, `cubeProg${i}`, "vShaderSource", "cubeFSource");
@@ -43,6 +52,8 @@ window.addEventListener("shaderloaded",()=>{
         glContext.bindBuffer(glContext.ARRAY_BUFFER, cubeVBuff);
         glContext.bufferData(glContext.ARRAY_BUFFER, new Float32Array(cubeVPos.flat()), glContext.STATIC_DRAW);
         shaderProgs[`cubeProg${i}`].vBuff = cubeVBuff;
+        shaderProgs[`cubeProg${i}`].eBuff = connectBuff;
+        shaderProgs[`cubeProg${i}`].eLength = connect.length;
     }
 
     const roomVBuff = glContext.createBuffer();
@@ -51,10 +62,14 @@ window.addEventListener("shaderloaded",()=>{
     glContext.bindBuffer(glContext.ARRAY_BUFFER, roomVBuff);
     glContext.bufferData(glContext.ARRAY_BUFFER, new Float32Array(roomVPos.flat()), glContext.STATIC_DRAW);
     shaderProgs["roomProg"].vBuff = roomVBuff;
-
-    cameraVBuff = glContext.createBuffer();
+    shaderProgs[`roomProg`].eBuff = connectBuff;
+    shaderProgs[`roomProg`].eLength = connect.length;
+ 
+    const cameraVBuff = glContext.createBuffer();
     shaderProgs["camera"].vBuff = cameraVBuff;
-
+    shaderProgs[`camera`].eBuff = connectBuff;
+    shaderProgs[`camera`].eLength = connect.length;
+ 
     for(let i in shaderProgs){
         let currentProgram = shaderProgs[i];
         getUniform(currentProgram, "worldCamPos");
@@ -73,20 +88,30 @@ window.addEventListener("shaderloaded",()=>{
     }
 
     window.requestAnimationFrame(render);
-
-});
+}
 
 function drawFrame(time){
     let inverseColor = (gameState.roomId > 7) * 1;
 
     clearBuffer();
     for(let i in shaderProgs){
+        let currentProgram = shaderProgs[i];
+
         if(i == "camera" && cameraSettings.first_player){
             continue;
-        } else {
+        } else if(i == "camera"){
             const camVPos = cubeVertex(worldCamPos,[.1,.1,.1]);
-            glContext.bindBuffer(glContext.ARRAY_BUFFER, cameraVBuff);
+            glContext.bindBuffer(glContext.ARRAY_BUFFER, currentProgram.vBuff);
             glContext.bufferData(glContext.ARRAY_BUFFER, new Float32Array(camVPos.flat()), glContext.STATIC_DRAW);
+        }
+
+        if(gameState.roomId < 0){
+            if(i == "room16"){
+            } else {
+                continue;
+            }
+        } else if( gameState.roomId >= 0 && i == "room16"){
+            continue;
         }
 
         let cubeId = -1.;
@@ -94,7 +119,12 @@ function drawFrame(time){
             cubeId = Number(i[8]);
         }
 
-        let currentProgram = shaderProgs[i];
+        if(gameState.roomId == -1){
+            lightPos[1] = 10;
+        } else {
+            lightPos[1] = 3;
+        }
+
         glContext.useProgram(currentProgram);
 
         glContext.bindBuffer(glContext.ARRAY_BUFFER, texCoordBuff);
@@ -117,13 +147,13 @@ function drawFrame(time){
         glContext.uniform3fv(currentProgram.uniforms["worldCamPos"], worldCamPos);
         glContext.uniform3fv(currentProgram.uniforms["viewCamPos"], viewCamPos);
 
-        glContext.uniform4f(currentProgram.uniforms["roomData"], gameState.roomId, cubeId, inverseColor, 0);
+        glContext.uniform4f(currentProgram.uniforms["roomData"], gameState.roomId, cubeId, inverseColor, Number(cameraSettings.first_player));
         glContext.uniform2f(currentProgram.uniforms["resolution"], canvas.width, canvas.height);
 
         glContext.uniform1f(currentProgram.uniforms["time"], time/1000);
 
-        glContext.bindBuffer(glContext.ELEMENT_ARRAY_BUFFER, connectBuff);
-        glContext.drawElements(glContext.TRIANGLES, 36, glContext.UNSIGNED_SHORT, 0);
+        glContext.bindBuffer(glContext.ELEMENT_ARRAY_BUFFER, currentProgram.eBuff);
+        glContext.drawElements(glContext.TRIANGLES, currentProgram.eLength, glContext.UNSIGNED_SHORT, 0);
     }
 }
 
@@ -146,81 +176,139 @@ function render(time){
 
 
     intOffset = cameraSettings.first_player ? .2 : .1;
-    var roomInt = isPointInsideBox(worldCamPos, room.b, intOffset);
-    var cubeInts = [];
-
-    for(let i in cubes){
-        cubeInts[i] = isPointOutsideBox(worldCamPos, cubes[i].b, cubes[i].p, intOffset);
-    }
-
-    for(let i in roomInt){    
-        let roomSide = ((i == 0) * 3 + (i == 3) * 1 + (i == 2) * 4 + (i == 5) * 2) - 1;
-        let teleRoomCamPos = worldCamPos;
-
-        if(roomInt[i]){
-            let roomId = gameState.roomId;
-            let roomChange = 0;
-            let goBack = (roomId > 0) && roomSide == 3;
-            let goNext = (roomId < 15) && roomSide == teleSide[roomId] && roomSide != 3;
-
-            if(goBack){
-                if(roomId > 0){
-                    let prevSide = teleSide[roomId - 1];
-                    teleRoomCamPos = prevRoomTele[prevSide](worldCamPos);
-                    switch(prevSide){
+    if(gameState.roomId >= 0){
+        var roomInt = isPointInsideBox(worldCamPos, room.b, intOffset);
+        var cubeInts = [];
+    
+        for(let i in cubes){
+            cubeInts[i] = isPointOutsideBox(worldCamPos, cubes[i].b, cubes[i].p, intOffset);
+        }
+    
+        for(let i in roomInt){    
+            let roomSide = ((i == 0) * 3 + (i == 3) * 1 + (i == 2) * 4 + (i == 5) * 2) - 1;
+            let teleRoomCamPos = worldCamPos;
+    
+            if(roomInt[i]){
+                let roomId = gameState.roomId;
+                let roomChange = 0;
+                let goBack = (roomId > 0 || gameState.room16) && roomSide == 3;
+                let goNext = (roomId < 15 || gameState.bonus) && roomSide == teleSide[roomId] && roomSide != 3;
+    
+                if(goBack){
+                    if(roomId > 0){
+                        let prevSide = teleSide[roomId - 1];
+                        teleRoomCamPos = prevRoomTele[prevSide](worldCamPos);
+                        switch(prevSide){
+                            case 0:
+                                mouse.x += .5 / mouseSpeed;
+                                break;
+                            case 1:
+                                break;
+                            case 2:
+                                mouse.x -= .5 / mouseSpeed;
+                                break;
+                        } 
+                    } else {
+                        teleRoomCamPos[2] = 2. + intOffset*1.5;
+                        gameState.bonus = 1;
+                    }
+                    roomChange--;
+                }
+    
+                if(goNext){
+                    let nextSide = teleSide[roomId];
+                    if(gameState.bonus && roomId == 15){
+                        if(roomSide == 0){
+                            teleRoomCamPos[0] = - worldCamPos[2];
+                            teleRoomCamPos[2] = -2 - intOffset*1.5;
+                        }
+                        if(roomSide == 2){
+                            teleRoomCamPos[0] = worldCamPos[2];
+                            teleRoomCamPos[2] = -2 - intOffset*1.5;
+                        }
+                        roomChange = -16;
+                    } else {
+                        teleRoomCamPos = nextRoomTele[nextSide](worldCamPos);
+                        roomChange++;
+                    }
+                    switch(roomSide){
                         case 0:
-                            mouse.x += .5 / mouseSpeed;
+                            mouse.x -= .5 / mouseSpeed;
                             break;
                         case 1:
                             break;
                         case 2:
-                            mouse.x -= .5 / mouseSpeed;
+                            mouse.x += .5 / mouseSpeed;
                             break;
-                    } 
+                    }
+                }
+    
+                if(goNext || goBack){
+                    worldCamPos[0] = teleRoomCamPos[0];
+                    worldCamPos[2] = teleRoomCamPos[2];
                 } else {
-                    teleRoomCamPos = [0,0,2];
-                    gameState.bonus = 1;
-                    mouse.x += 1/mouseSpeed;
-                    mouse.y = 0;
+                    worldCamPos[i%3] = room.b[i] + intOffset * (i < 3 ? -1 : 1);
                 }
-                roomChange--;
-            }
-
-            if(goNext){
-                let nextSide = teleSide[roomId];
-                teleRoomCamPos = nextRoomTele[nextSide](worldCamPos);
-                roomChange++;
-                switch(roomSide){
-                    case 0:
-                        mouse.x -= .5 / mouseSpeed;
-                        break;
-                    case 1:
-                        break;
-                    case 2:
-                        mouse.x += .5 / mouseSpeed;
-                        break;
+    
+                gameState.roomId += roomChange;
+    
+                if(gameState.roomId == 15){
+                    gameState.room16 = 1;
                 }
             }
-
-            if(goNext){
-                worldCamPos[0] = teleRoomCamPos[0];
-                worldCamPos[2] = teleRoomCamPos[2];
-            } else if(goBack){
-                worldCamPos[0] = teleRoomCamPos[0];
-                worldCamPos[2] = teleRoomCamPos[2];
-            } else {
-                worldCamPos[i%3] = room.b[i] + intOffset * (i < 3 ? -1 : 1);
+        }
+      
+        for(let i in cubeInts){
+            let cubeInt = cubeInts[i];
+            for(let j in cubeInt.side){
+                if(cubeInt.side[j]){
+                    worldCamPos[j%3] = cubes[i].b[j] + intOffset * (j < 3 ? 1 : -1);
+                }
             }
-            gameState.roomId += roomChange;
         }
     }
-  
-    for(let i in cubeInts){
-        let cubeInt = cubeInts[i];
-        for(let j in cubeInt.side){
-            if(cubeInt.side[j]){
-                worldCamPos[j%3] = cubes[i].b[j] + intOffset * (j < 3 ? 1 : -1);
+
+    if(gameState.roomId == -1){
+        var roomInt = isPointOutsideBox(worldCamPos, room.b, room.p, intOffset);
+        var floorInt = worldCamPos[1] < (intOffset);
+        for(let i in roomInt.side){
+            if(roomInt.side[i]){
+                let teleRoomCamPos = worldCamPos;
+                let goRoom0 = i == 2;
+                let goRoom15 = i == 5;
+                let roomId = -1;
+
+                if(goRoom0){
+                    roomId = 0;
+                    teleRoomCamPos[2] = room.b[2] - intOffset*1.5;
+                }
+
+                if(goRoom15){
+                    roomId = 15;
+                    let roomSide = teleSide[15];
+                    if(roomSide == 0){
+                        mouse.x += .5/mouseSpeed;
+                    }
+                    if(roomSide == 2){
+                        mouse.x -= .5/mouseSpeed;
+                    }
+                    teleRoomCamPos[2] = 2.;
+                    teleRoomCamPos = prevRoomTele[roomSide](teleRoomCamPos);
+                }
+
+                gameState.roomId = roomId;
+
+                if(!(goRoom0 || goRoom15)){
+                    worldCamPos[i%3] = room.b[i] + intOffset * (i < 3 ? 1 : -1);
+                } else {
+                    worldCamPos[0] = teleRoomCamPos[0];
+                    worldCamPos[2] = teleRoomCamPos[2];
+                }
             }
+        }
+
+        if(floorInt){
+            worldCamPos[1] = intOffset;
         }
     }
 
@@ -246,6 +334,6 @@ function render(time){
     drawFrame(time);
     window.requestAnimationFrame(render);
 }
-//window.requestAnimationFrame(render);
 
+window.addEventListener("shaderloaded",gameStart);
 loadUrlShaders();
