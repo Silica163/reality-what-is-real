@@ -63,15 +63,19 @@ float cube(vec3 p, vec3 pos, vec3 s){
     return length(max(cu,0.)) + min(max3(cu),0.);
 }
 
-vec2 dist(vec3 p){
+vec2 dist(vec3 p, float s){
     float d = MAX;
     int mat = 0;
     float cubeDist = cube(p, vec3(0,2,0), vec3(2));
     float cam = MAX;
     float floorDist = p.y;
     float light = sphere(p, lightPos, .5);
-    if(roomData.a == 0.)
+    if(roomData.a == 0. && s < .5)
         cam = sphere(p, worldCamPos, .1);
+
+    if(s > .5){
+        d = min(d,cube(p, worldCamPos, vec3(.1)));
+    }
 
     d = min(d, cubeDist);
     d = min(d, cam);
@@ -87,16 +91,16 @@ vec2 dist(vec3 p){
 vec3 normal(vec3 p){
     vec2 e = vec2(.001,0);
     return normalize(vec3(
-        dist(p + e.xyy).x,
-        dist(p + e.yxy).x,
-        dist(p + e.yyx).x
+        dist(p + e.xyy, 0.).x,
+        dist(p + e.yxy, 0.).x,
+        dist(p + e.yyx, 0.).x
     ));
 }
 
 float march(vec3 ro, vec3 rp, vec3 rd){
     float rl = length(ro - rp);
     for(int i = 0; i < STEPS; i++){
-        float d = dist(rp).x;
+        float d = dist(rp, 0.).x;
         if(d > MAX)break;
         rl += d;
         rp = ro + rd * rl;
@@ -105,9 +109,24 @@ float march(vec3 ro, vec3 rp, vec3 rd){
     return rl;
 }
 
+float shadowMarch(vec3 ro, float ss){
+    float rl = 0., s = 1.;
+    float lDist = length(ro - lightPos) - 1.;
+    for(int i = 0; i < STEPS; i++){
+        vec3 rp = ro + rl*L;
+        float d  = dist(rp, ss).x;
+        rl += d;
+        s = min(s, 32.*d/rl);
+        if(d <= MIN)break;
+        if(rl >= lDist)break;
+    }
+    if( rl < lDist)s = 0.;
+    return clamp(s,0.,1.);
+}
+
 void main(){
     V = normalize(vWorldPos.xyz - viewCamPos);
-    vec3 c = vec3(0);
+    float c = 0.;
     vec3 ro = viewCamPos;
     vec3 rp = ro;
     float rl = march(ro, rp, V);
@@ -115,26 +134,28 @@ void main(){
     rp = ro + V * rl;
     N = normal(rp);
     L = normalize(lightPos - rp);
-    float mat = dist(rp).y;
+    float mat = dist(rp, 0.).y;
     float lightDist = length(lightPos - rp)/4.;
+    float s = 1.;
+    if(mat == 3.)s = 0.;
+    float shadow = shadowMarch(rp + N*MIN*1.5, s) + .3;
     if(mat == 1.){
-        c = vec3(1./lightDist)*arrowPattern(rp.xz, 4.) * diffuse(vec3(0,1,0),L);
-//        c = N;
+        c = (1./lightDist)*arrowPattern(rp.xz, 4.) * diffuse(vec3(0,1,0),L) * shadow;
     } else if( mat == 2.){
-        c = vec3(
+        c = (
             1./(rl+.9) + .2
-        );
+        )*shadow;
     } else if( mat == 3.){
-        c = vec3(0);
-        c += diffuse(N, L);
+        c = 0.;
+        c += diffuse(N, L) * min(shadow+.2,1.);
         c += phong(N,L,V,32.);
         c = c/3.+.3;
         c /= lightDist;
         c += (1.-diffuse(N,-V))*.2;
     } else if(mat == 4.){
-        c = vec3(1);
+        c = 1.;
     } else if( mat == 0.){
-        c = vec3(0);
+        c = 0.;
     }
-    gl_FragColor = vec4(c,1);
+    gl_FragColor = vec4(vec3(c),1);
 }

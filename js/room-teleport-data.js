@@ -12,21 +12,21 @@ let nextRoomTele = [
 
 let prevRoomTele = [
     function (p){
-        return [-p[2] + intOffset, p[1], -p[0]];
+        return [-2 + intOffset, p[1], -p[0]];
     },
     function (p){
-        return [             p[0], p[1], -p[2] + intOffset];
+        return [             p[0], p[1], -2 + intOffset];
     },
     function (p){
-        return [ p[2] - intOffset, p[1],  p[0]];
+        return [ 2 - intOffset, p[1],  p[0]];
     }
 ];
 
 let teleSide = [
-    1,1,1,1,
-    1,1,1,1,
-    1,1,1,1,
-    1,1,1,1
+    0,1,2,1,
+    2,1,2,1,
+    1,2,2,0,
+    0,1,2,1
 ];
 function genMap(){
     for(let i in teleSide){
@@ -35,4 +35,4 @@ function genMap(){
     }
 }
 
-genMap();
+//genMap();

@@ -34,7 +34,7 @@ function moveCamera(e){
         if(e.code == "KeyM" && e.type == "keyup")enableLock = !enableLock;
         if(e.code == "KeyR" && e.type == "keyup"){
             worldCamPos[0] = 0;
-            worldCamPos[1] = .5;
+            worldCamPos[1] = cameraSettings.y;
             worldCamPos[2] = 0;
         }
 //        if(e.code == "Space" && e.type == "keydown" && movement.y <= 0.)movement.y += 2.;

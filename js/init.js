@@ -17,9 +17,11 @@ const movement = {x:0,y:0,z:0};
 const lookAngle = {lr:0,ud:0};
 const gameState = {
     roomId: 0,
-    room16: 1,
+    room16: 0,
+    bonus: 0,
 }
 const cameraSettings  = {
+    y: .4,
     first_player: true,
     third_player_dist: .4,
     FOV: PI/1.7,
@@ -42,7 +44,7 @@ mat4.perspective(
 let lookDir = vec3.fromValues(0,0,-1);
 
 let viewCamPos = vec3.fromValues(0,0,0);
-const worldCamPos = vec3.fromValues(0,.2,0);
+const worldCamPos = vec3.fromValues(0,.4,0);
 const camRotMat = mat4.lookAt([0],[0,0,0],lookDir,[0,1,0])
 const invCamRot = mat4.invert([0],camRotMat);
 const camDirMovement = vec3.fromValues(0,0,0);
