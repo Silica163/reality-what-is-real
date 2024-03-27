@@ -169,7 +169,7 @@ function render(time){
     var camDirLen = Math.sqrt(camDirMovement[0]*camDirMovement[0] + camDirMovement[2]*camDirMovement[2]);
     if(camDirLen > 0.)
         vec3.scale(camDirMovement,camDirMovement,1./camDirLen);
-    vec3.scale(camDirMovement,camDirMovement,moveSpeed);
+    vec3.scale(camDirMovement,camDirMovement,moveSpeed*(run ? 2 : 1));
     if(gameState.roomId < 0)
         vec3.rotateX(camDirMovement,camDirMovement,[0,0,0],lookAngle.ud);
     vec3.rotateY(camDirMovement,camDirMovement,[0,0,0],lookAngle.lr);

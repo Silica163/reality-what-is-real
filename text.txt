@@ -1,9 +1,8 @@
 room0:
-This is a first room.
+This is a first of sixteen room in this game.
 You can walk with WASD, JIKL, or arrow keys. And look around using mouse.
-The gole of this game is to find something REAL, discover some ILLUSION, and find the REAL you.
+The gole of this game is to get out of this 16 room, find something REAL, discover some ILLUSION, and find the REAL you.
 Look at four cubes on the floor, it can tell the which room you are.
-There are 16 room in this game, find it.
 <delay>
 Don't trust the wall.
 
@@ -24,10 +23,65 @@ Every room has two way to enter, one is the black arrow, another is one of three
 I mean EVERY room including this room and the first one.
 
 room16:
-
+Finally, you find the exit.
+I recommended you to explore this area outside the room behind you.
+Here, you can fly, walk and move anyway you want.
+But remember, EVERY room have 2 way to enter.
+<long delay>
+Did you look at the floor?
+If you didn't, may be look at the floor please.
+<delay>
+See the shadow? It's a cube's shadow right?
+But when you use the third person POV you see a sphere, why?
 
 after enter room 15 from room 16(-1):
-
+Do you remember this room?
+Y: Yes
+N: you don't?
+It's room 15, all 16 room just another illusion.
+It's just a cube you saw before you enter this room.
+<delay>
+Do you want to explore this game more?
+Y: Ok. You can exit this game with ESC
+N: <QUIT, CREDIT MENU>
 
 room -2 (bug):
 Wow you found a secret level (It's NOT a BUG :P)
+
+
+
+=====          MAIN MENU           =====
+
+              PLAY
+              HOW TO PLAY
+              CONTROL
+              QUIT
+              CREDIT
+
+=====                              =====
+
+
+=====           ESC MENU           =====
+
+                RESUME
+                CONTROL
+                QUIT
+
+=====                              =====
+
+
+
+=====        CONTROL MENU          =====
+
+MOVE: WASD, IJKL, ARROW KEYS
+LOOK: CLICK AND DRAG, CLICK AND MOVE
+THIRD PERSON TOGGLE: V, N
+MOUSE CAPTURE TOGGLE: M
+RUN: SHIFT, ;
+JUMP: NOT IMPLIMENTED
+
+=====                              =====
+
+
+=====        CREDIT MENU           =====
+=====                              =====

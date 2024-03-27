@@ -13,6 +13,7 @@ if(!glContext){
 let mouse = {x:0,y:0};
 const mouseSpeed = .7;
 let moveSpeed = .025;
+let run = false;
 const movement = {x:0,y:0,z:0};
 const lookAngle = {lr:0,ud:0};
 const gameState = {
@@ -58,7 +59,7 @@ mat4.translate(
 );
 
 let pointerLock = false;
-let enableLock = false;
+let enableLock = true;
 let intOffset = 0; 
 
 const logDiv = document.getElementById("log");

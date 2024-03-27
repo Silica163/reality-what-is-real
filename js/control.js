@@ -1,41 +1,46 @@
-window.addEventListener("keydown",moveCamera);
-window.addEventListener("keyup",moveCamera);
-function moveCamera(e){
+window.addEventListener("keydown",control);
+window.addEventListener("keyup",control);
+function control(e){
     console.log(e.code);
     if(!e.defaultPrevented){
-        var move = false;
-        if(e.type == "keydown")move = true;
+        var keyDown = (e.type == "keydown");
         switch(e.code){
             case "ArrowRight" : 
             case "KeyL" :
             case "KeyD":
-                movement.x = move ? 1 : 0;
+                movement.x = keyDown ? 1 : 0;
                 break;
             case "ArrowLeft" :
             case "KeyJ" :
             case "KeyA" :
-                movement.x = move ? -1 : 0;
+                movement.x = keyDown ? -1 : 0;
                 break;
             case "ArrowDown" :
             case "KeyK" :
             case "KeyS" :
-                movement.z = move ? 1 : 0;
+                movement.z = keyDown ? 1 : 0;
                 break;
             case "ArrowUp" :
             case "KeyI" :
             case "KeyW":
-                movement.z = move ? -1 : 0;
+                movement.z = keyDown ? -1 : 0;
                 break;
             default : 
                 break ;
         }
 
-        if(e.code == "KeyV" && e.type == "keyup")cameraSettings.first_player = !cameraSettings.first_player;
-        if(e.code == "KeyM" && e.type == "keyup")enableLock = !enableLock;
-        if(e.code == "KeyR" && e.type == "keyup"){
+        if(e.code == "KeyV" && !keyDown )cameraSettings.first_player = !cameraSettings.first_player;
+        if(e.code == "KeyN" && !keyDown )cameraSettings.first_player = !cameraSettings.first_player;
+        if(e.code == "KeyM" && !keyDown )enableLock = !enableLock;
+/*        if(e.code == "KeyR" && e.type == "keyup"){
             worldCamPos[0] = 0;
             worldCamPos[1] = cameraSettings.y;
             worldCamPos[2] = 0;
+        }*/
+        if(e.code == "Semicolon" && keyDown){
+            run = true || e.shiftKey;
+        } else {
+            run = false || e.shiftKey;
         }
 //        if(e.code == "Space" && e.type == "keydown" && movement.y <= 0.)movement.y += 2.;
     }
