@@ -1,21 +1,10 @@
 precision highp float;
-
-uniform mat4 invCamRot;
-uniform mat4 uViewMat;
-uniform mat4 uProjMat;
-uniform vec4 roomData;
 uniform vec3 viewCamPos;
 uniform vec3 worldCamPos;
 uniform vec3 lightPos;
-uniform vec2 resolution;
 uniform float time;
 
 varying vec4 vWorldPos;
-varying vec4 vScreenPos;
-varying vec3 surfNormal;
-varying vec3 surfPos;
-varying vec3 tmp;
-varying vec2 vUv;
 
 float arrow(vec2 uv){
     float c = 0.;
@@ -54,7 +43,6 @@ vec3 V = vec3(0);
 vec3 L = vec3(0);
 vec3 N = vec3(0);
 void main(){
-    N = surfNormal;
     V = normalize(vWorldPos.xyz - viewCamPos);
     
     vec3 rp = vWorldPos.xyz;

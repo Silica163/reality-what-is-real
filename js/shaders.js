@@ -1,16 +1,20 @@
 const vertexShaderList = [
     "vShaderSource",
+    "camera",
     "room16v",
+    "menu",
 ];
 
 const fragmentShaderList = [
     "cubeFSource",
     "roomFSource",
-    "cameraFSource",
+    "camera",
     "room16f",
+    "menu",
 ];
 
-const shaders = {};
+const vShaders = {};
+const fShaders = {};
 let shaderLoaded = 0;
 const shaderLoadedEvent = new CustomEvent("shaderloaded");
 
@@ -20,7 +24,10 @@ function loadUrlShader(url, shaderName){
     }
     fetch(url).then((stream) => {
         stream.text().then((texts)=>{
-            shaders[shaderName] = texts;
+            if(url.indexOf("frag") > -1)
+                fShaders[shaderName] = texts;
+            if(url.indexOf("vert") > -1)
+                vShaders[shaderName] = texts;
             shaderLoaded++;
             if(shaderLoaded == (vertexShaderList.length + fragmentShaderList.length)){
                 window.dispatchEvent(shaderLoadedEvent);

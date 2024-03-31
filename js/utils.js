@@ -52,7 +52,7 @@ function clearBuffer(){
 const shaderProgs = {};
 function createRenderProgram(gl, name, vertexShaderName, fragmentShaderName){
     const program = gl.createProgram();
-    attachShader(gl, program, shaders[vertexShaderName], shaders[fragmentShaderName]);
+    attachShader(gl, program, vShaders[vertexShaderName], fShaders[fragmentShaderName]);
     linkProgram(gl, program);
     shaderProgs[name] = program;
     return program;

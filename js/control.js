@@ -46,11 +46,19 @@ function control(e){
     }
 }
 
-canvas.addEventListener("mousemove",e => {
+function updateMouseObj(e){
+    pointer = e.pointerId;
+    mouseObj[0] = (2.*e.offsetX - canvas.width)/canvas.height;
+    mouseObj[1] = -(2.*e.offsetY - canvas.height)/canvas.height;
+    mouseObj[2] = e.buttons;
+}
+
+canvas.addEventListener("pointermove",e => {
+    updateMouseObj(e);
     if(document.pointerLockElement !== canvas) pointerLock = false;
     if(pointerLock || (e.buttons && (!enableLock)) ){
-        mouse.x += e.movementX/glContext.canvas.height;
-        mouse.y += e.movementY/glContext.canvas.height;
+        mouse.x += e.movementX/canvas.height;
+        mouse.y += e.movementY/canvas.height;
         mouse.y = Math.min(1,Math.max(-1,mouse.y));
     } else {
 /*        if(enableLock){
@@ -62,9 +70,11 @@ canvas.addEventListener("mousemove",e => {
     }
 });
 
+canvas.addEventListener("pointerup",updateMouseObj);
 
-canvas.addEventListener("mousedown",(e)=>{
-    if(!enableLock)return;
+canvas.addEventListener("pointerdown",(e)=>{
+    updateMouseObj(e);
+    if(!enableLock || gameState.dispMenu)return;
     canvas.requestPointerLock();
     pointerLock = true;
 });

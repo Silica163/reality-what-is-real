@@ -18,10 +18,48 @@ const room = {
     s:[2,2,2],
 }
 
+function initMenu(){
+    const gl = glContext;
+    createRenderProgram(gl, "menuProg", "menu", "menu");
+    
+    getUniform(shaderProgs["menuProg"], "uMouse");
+    const menuVertex = gl.createBuffer();
+    shaderProgs["menuProg"].vBuff = menuVertex;
+    gl.bindBuffer(gl.ARRAY_BUFFER, menuVertex);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, 1, 1, 1,-1,-1, 1,-1]), gl.STATIC_DRAW);
+
+    const menuIndics = gl.createBuffer();
+    shaderProgs["menuProg"].eLength = 6;
+    shaderProgs["menuProg"].eBuff = menuIndics;
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, menuIndics);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array([0,1,2,1,3,2]), gl.STATIC_DRAW);
+}
+
+
+function drawMenu(time){
+    const gl = glContext, program = shaderProgs["menuProg"];
+   
+    gl.useProgram(program);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, program.vBuff);
+    gl.enableVertexAttribArray(program.attribs["aWorldVertexPos"]);
+    gl.vertexAttribPointer(program.attribs["aWorldVertexPos"], 2, gl.FLOAT, false, 0, 0);
+
+    gl.uniform4fv(program.uniforms["uMouse"], mouseObj);
+    gl.uniform2f(program.uniforms["resolution"], canvas.width, canvas.height);
+
+    gl.uniform1f(program.uniforms["time"], time/1000);
+
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, program.eBuff);
+    gl.drawElements(gl.TRIANGLES, program.eLength, gl.UNSIGNED_SHORT, 0);
+ 
+}
+
 function gameStart(){
-    createRenderProgram(glContext, "camera", "vShaderSource", "cameraFSource");
+    createRenderProgram(glContext, "camera", "camera", "camera");
     createRenderProgram(glContext, "roomProg", "vShaderSource", "roomFSource");
     createRenderProgram(glContext, "room16", "room16v", "room16f");
+    initMenu();
 
     const frontCamPlane = glContext.createBuffer();
     const frontPlane = glContext.createBuffer();
@@ -94,6 +132,11 @@ function drawFrame(time){
     let inverseColor = (gameState.roomId > 7) * 1;
 
     clearBuffer();
+
+    // draw only menu for testing only
+    drawMenu(time);
+    return;
+
     for(let i in shaderProgs){
         let currentProgram = shaderProgs[i];
 
@@ -147,7 +190,7 @@ function drawFrame(time){
         glContext.uniform3fv(currentProgram.uniforms["worldCamPos"], worldCamPos);
         glContext.uniform3fv(currentProgram.uniforms["viewCamPos"], viewCamPos);
 
-        glContext.uniform4f(currentProgram.uniforms["roomData"], gameState.roomId, cubeId, inverseColor, Number(cameraSettings.first_player));
+        glContext.uniform4f(currentProgram.uniforms["roomData"], gameState.roomId, cubeId, inverseColor, cameraSettings.first_player*1);
         glContext.uniform2f(currentProgram.uniforms["resolution"], canvas.width, canvas.height);
 
         glContext.uniform1f(currentProgram.uniforms["time"], time/1000);

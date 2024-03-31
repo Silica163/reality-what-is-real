@@ -4,7 +4,7 @@ You can walk with WASD, JIKL, or arrow keys. And look around using mouse.
 The gole of this game is to get out of this 16 room, find something REAL, discover some ILLUSION, and find the REAL you.
 Look at four cubes on the floor, it can tell the which room you are.
 <delay>
-Don't trust the wall.
+Don't trust anything in this game, it isn't real.
 
 room1:
 Look like you pass the first room, there are 15 room left to go. goodluck.

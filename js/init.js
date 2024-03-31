@@ -10,6 +10,10 @@ if(!glContext){
     logger("webgl 2.0 is not support.");
 }
 
+let mouseObj = new Float32Array([0,0,0,0]);
+let pointer = 0;
+
+// mouse for in-game control
 let mouse = {x:0,y:0};
 const mouseSpeed = .7;
 let moveSpeed = .025;
@@ -17,6 +21,7 @@ let run = false;
 const movement = {x:0,y:0,z:0};
 const lookAngle = {lr:0,ud:0};
 const gameState = {
+    dispMenu: true,
     roomId: 0,
     room16: 0,
     bonus: 0,
