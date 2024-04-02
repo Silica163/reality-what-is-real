@@ -85,3 +85,43 @@ JUMP: NOT IMPLIMENTED
 
 =====        CREDIT MENU           =====
 =====                              =====
+
+
+ASCII2TEXTURE
+
+1D = HEXCHAR - 33
+2D = ((1D%16),MAXY - (1D/16))
+
+
+vec2 char2p(int c){
+    c = c - 33;
+    return vec2(mod(float(c),16.),15-c/16);
+}
+
+void mainImage( out vec4 fragColor, in vec2 fragCoord )
+{
+    int t[] = int[](
+    );
+    vec2 shift = vec2(32,16);
+    vec2 uv = floor(shift*fragCoord/iResolution.y); 
+    // font position
+    vec2 f  = (fract(shift*fragCoord/iResolution.y)-.5)*vec2(shift.y/shift.x,1);
+    // center f(0,0) to the center of uv cell
+
+    // Time varying pixel color
+    vec3 col = vec3(0);
+    
+    for(int i = 0; i < 256; i++){
+        vec2 cp = char2p(t[i]), tp = char2p(i+33);
+        // hard coded "cp in to texture"
+        if(tp == uv && t[i] != 32){
+            col.b = texture(iChannel0,cp/16.+(f+.5)/16.).r;
+            col.rg = max(f,col.bb);
+        }
+    }
+    
+    if(fragCoord.x/iResolution.y > 1.){col = vec3(1);}
+
+    // Output to screen
+    fragColor = vec4(col,1.0);
+}

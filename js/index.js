@@ -18,11 +18,33 @@ const room = {
     s:[2,2,2],
 }
 
+const menuDataTexture = glContext.createTexture();
+
 function initMenu(){
     const gl = glContext;
     createRenderProgram(gl, "menuProg", "menu", "menu");
     
     getUniform(shaderProgs["menuProg"], "uMouse");
+    getUniform(shaderProgs["menuProg"], "menuData");
+
+    const image = new Image();
+    image.onload = function(){
+        gl.bindTexture(gl.TEXTURE_2D, menuDataTexture);
+        gl.texImage2D(
+            gl.TEXTURE_2D,
+            0,
+            gl.RGBA,
+            gl.RGBA,
+            gl.UNSIGNED_BYTE,
+            image
+        );
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    }
+    image.src = "img/texture.png";
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+
     const menuVertex = gl.createBuffer();
     shaderProgs["menuProg"].vBuff = menuVertex;
     gl.bindBuffer(gl.ARRAY_BUFFER, menuVertex);
@@ -40,6 +62,10 @@ function drawMenu(time){
     const gl = glContext, program = shaderProgs["menuProg"];
    
     gl.useProgram(program);
+
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, menuDataTexture);
+    gl.uniform1i(program.uniforms["menuData"], 0);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, program.vBuff);
     gl.enableVertexAttribArray(program.attribs["aWorldVertexPos"]);

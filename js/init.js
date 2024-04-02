@@ -9,7 +9,7 @@ let glContext = canvas.getContext("webgl2",{ preserveDrawingBuffer: true, alpha:
 if(!glContext){
     logger("webgl 2.0 is not support.");
 }
-
+glContext.getExtension("EXT_shader_texture_lod");
 let mouseObj = new Float32Array([0,0,0,0]);
 let pointer = 0;
 
