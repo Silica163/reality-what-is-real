@@ -19,6 +19,9 @@ const room = {
 }
 
 const menuDataTexture = glContext.createTexture();
+const gameTexture = glContext.createTexture();
+const gameFrameBuffer = glContext.createFramebuffer();
+const gameRenderBuffer = glContext.createRenderbuffer();
 
 function initMenu(){
     const gl = glContext;
@@ -26,10 +29,12 @@ function initMenu(){
     
     getUniform(shaderProgs["menuProg"], "uMouse");
     getUniform(shaderProgs["menuProg"], "menuData");
+    getUniform(shaderProgs["menuProg"], "background");
 
     const image = new Image();
     image.onload = function(){
         gl.bindTexture(gl.TEXTURE_2D, menuDataTexture);
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
         gl.texImage2D(
             gl.TEXTURE_2D,
             0,
@@ -43,8 +48,36 @@ function initMenu(){
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
     }
     image.src = "img/texture.png";
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+   
+    gl.bindTexture(gl.TEXTURE_2D, gameTexture);
+    gl.texImage2D(
+        gl.TEXTURE_2D,
+        0,
+        gl.RGBA,
+        canvas.width,
+        canvas.height,
+        0,
+        gl.RGBA,
+        gl.UNSIGNED_BYTE,
+        null,
+    );
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 
+    gl.bindFramebuffer(gl.FRAMEBUFFER, gameFrameBuffer);
+    gl.bindRenderbuffer(gl.RENDERBUFFER, gameRenderBuffer);
+    gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, canvas.width, canvas.height);
+    gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, gameRenderBuffer);
+
+    gl.bindTexture(gl.TEXTURE_2D, gameTexture);
+    gl.framebufferTexture2D(
+        gl.FRAMEBUFFER, 
+        gl.COLOR_ATTACHMENT0, 
+        gl.TEXTURE_2D, 
+        gameTexture, 
+        0
+    ); 
     const menuVertex = gl.createBuffer();
     shaderProgs["menuProg"].vBuff = menuVertex;
     gl.bindBuffer(gl.ARRAY_BUFFER, menuVertex);
@@ -59,6 +92,7 @@ function initMenu(){
 
 
 function drawMenu(time){
+    clearBuffer();
     const gl = glContext, program = shaderProgs["menuProg"];
    
     gl.useProgram(program);
@@ -66,6 +100,10 @@ function drawMenu(time){
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, menuDataTexture);
     gl.uniform1i(program.uniforms["menuData"], 0);
+    
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, gameTexture);
+    gl.uniform1i(program.uniforms["background"],1);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, program.vBuff);
     gl.enableVertexAttribArray(program.attribs["aWorldVertexPos"]);
@@ -158,10 +196,6 @@ function drawFrame(time){
     let inverseColor = (gameState.roomId > 7) * 1;
 
     clearBuffer();
-
-    // draw only menu for testing only
-    drawMenu(time);
-    return;
 
     for(let i in shaderProgs){
         let currentProgram = shaderProgs[i];
@@ -406,7 +440,15 @@ function render(time){
         vec3.negate([0],viewCamPos)
     );
 
-    drawFrame(time);
+    if(gameState.dispMenu){
+        glContext.bindFramebuffer(glContext.FRAMEBUFFER, gameFrameBuffer);
+        drawFrame(time);
+        glContext.bindFramebuffer(glContext.FRAMEBUFFER, null);
+
+        drawMenu(time);
+    } else {
+        drawFrame(time);
+    }
     window.requestAnimationFrame(render);
 }
 

@@ -12,38 +12,62 @@ uniform sampler2D menuData;
 // blue => chary
 // alpha => 
 
+//charmap 
+// red clickable?
+// green charX
+// blue charY
+// alpha menu
+
+uniform sampler2D background;
 out vec4 FragColor;
 
-vec2 charData = vec2(13,10);
+#define PI 3.14159265
+
+vec2 gridSize = vec2(16,8);
+vec2 main_menu = vec2(13,10);
+vec2 control_menu = vec2(14, 10);
+vec2 esc_menu = vec2(15,10);
+vec2 how_to_play = vec2(0,9);
+
+ivec2 getMenuPos(vec2 menu, vec2 centerCord){
+    return ivec2(menu*45.) + ivec2(floor((centerCord*gridSize.x)/(gridSize.yx*45.))) + ivec2(0,29);
+}
 
 void main(){
     vec2 res = resolution.xy;
     vec2 uv = (2. * gl_FragCoord.xy - res.xy)/res.y;
     vec2 sqFc = gl_FragCoord.xy - floor((res-res.y) / 2.);
 
-    vec2 gridSize = vec2(16,8);
     vec2 charGrid = floor(uv*gridSize);
     vec2 gridUv = (fract(uv*gridSize)-.5)*(gridSize.yx/gridSize.x)+.5;
-    
     vec2 mouseGrid = floor(uMouse.xy*gridSize);
 
+    vec2 menu = vec2(0);
+    switch(int(time/2.)%4){
+        case 0: menu = main_menu;
+                break;
+        case 1: menu = esc_menu;
+                break;
+        case 2: menu = control_menu;
+                break;
+        case 3: menu = how_to_play;
+                break;
+    }
+    vec4 cp = texelFetch(menuData, getMenuPos(menu, sqFc), 0);
+    vec4 char = texture(menuData,(cp.gb*cp.a)+gridUv/16.);
+    bool pxInsideMenu = cp.a == 1.;
+    bool menuSelect = charGrid.y == mouseGrid.y && abs(uMouse.x) <= 1. && pxInsideMenu && cp.r == 1.;
+
     vec3 c = vec3(0);
-    c.rg = uv;
+    c += smoothstep(.4,.5,abs(gridUv.y-.5)*float(menuSelect)) + float(menuSelect)*.2;
+    c += char.r*char.a;
+    c += cp.a*.1;
 
-    if(abs(uv.x) <= 1.){
-        vec3 cp = texelFetch(menuData, ivec2(charData/16.*720.) + ivec2((sqFc/(gridSize*2.))*vec2((gridSize*2.)/45.)*(gridSize.x/gridSize.yx)) + ivec2(0,29), 0).rgb;
-
-//        c = texture(menuData,charData/16.+((sqFc/res.y)/16.)*vec2(gridSize.x*2./45.,16./45.) + vec2(0,(45.-16.)/45.)/16.).rgb;
-//
-        c = texture(menuData,(cp.gb*cp.r)+gridUv/16.).rrr;
-//        c = texture(menuData,(charGrid+8.)/16.+gridUv/16.).rgb;
-//        c = cp;
+    if(uMouse.z > 0. && pxInsideMenu && menuSelect){
+        c += .3;
     }
 
-    c.b = max(c.b,float(charGrid.y == mouseGrid.y));
-    if(uMouse.z > 0. && float(charGrid.y == mouseGrid.y) > 0.){
-        c = vec3(1.-c.x) * c.b;
-    }
-//    c.rg = gridUv;
+    c = c + texture(background, gl_FragCoord.xy/res).rgb*(1.-char.a)*.5;
+
     FragColor = vec4(c,1);
 }

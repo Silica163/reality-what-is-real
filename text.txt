@@ -1,7 +1,5 @@
 room0:
-This is a first of sixteen room in this game.
-You can walk with WASD, JIKL, or arrow keys. And look around using mouse.
-The gole of this game is to get out of this 16 room, find something REAL, discover some ILLUSION, and find the REAL you.
+This is a first of 16 room in this game.
 Look at four cubes on the floor, it can tell the which room you are.
 <delay>
 Don't trust anything in this game, it isn't real.
@@ -79,6 +77,18 @@ THIRD PERSON TOGGLE: V, N
 MOUSE CAPTURE TOGGLE: M
 RUN: SHIFT, ;
 JUMP: NOT IMPLIMENTED
+
+=====                              =====
+
+=====        HOW TO PLAY           =====
+
+You can walk with WASD, JIKL
+or arrow keys,
+look around using mouse.
+The gole of this game is to 
+get out of this 16 room, 
+find something REAL 
+and discover some ILLUSION.
 
 =====                              =====
 
