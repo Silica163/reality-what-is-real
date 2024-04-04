@@ -21,7 +21,7 @@ float arrow(vec2 uv){
     float c = 0.;
     uv.x = abs(uv.x);
     c = min(max((uv.y - (1.-uv.x))*.5,-uv.y), max((uv.x-.5),abs(uv.y+.5)-.5));
-    return smoothstep(0.,.001,c);
+    return smoothstep(0.,.005,c);
 }
 
 float arrowPattern(vec2 uv, float scale){

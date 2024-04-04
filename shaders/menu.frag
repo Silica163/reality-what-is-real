@@ -61,13 +61,21 @@ void main(){
     vec3 c = vec3(0);
     c += smoothstep(.4,.5,abs(gridUv.y-.5)*float(menuSelect)) + float(menuSelect)*.2;
     c += char.r*char.a;
-    c += cp.a*.1;
+    c += cp.a*.2;
 
     if(uMouse.z > 0. && pxInsideMenu && menuSelect){
         c += .3;
     }
 
-    c = c + texture(background, gl_FragCoord.xy/res).rgb*(1.-char.a)*.5;
+    vec3 bg = vec3(0);
+    float kernel[] = float[](1.,6.,15.,20.,14.,6.,1.);
+    for(int i = 0;i < 7;i++){
+        for(int j = 0; j < 7; j++){
+//            bg += texelFetch(background,ivec2((gl_FragCoord.xy+vec2(i-3,j-3))),0).rgb*(kernel[i]*kernel[j])/(64.*64.);
+            bg += texture(background,(gl_FragCoord.xy+vec2(i-3,j-3))/res).rgb*(kernel[i]*kernel[j])/(64.*64.);
+        }
+    }
+    c = c + bg*(1.-char.a)*.5;
 
     FragColor = vec4(c,1);
 }
