@@ -18,17 +18,16 @@ const room = {
     s:[2,2,2],
 }
 
-const menuDataTexture = glContext.createTexture();
-const gameTexture = glContext.createTexture();
-const gameFrameBuffer = glContext.createFramebuffer();
-const gameRenderBuffer = glContext.createRenderbuffer();
+const menuDataTexture = gl.createTexture();
+const gameTexture = gl.createTexture();
+const gameFrameBuffer = gl.createFramebuffer();
+const gameRenderBuffer = gl.createRenderbuffer();
 
 function initMenu(){
-    const gl = glContext;
-    createRenderProgram(gl, "menuProg", "menu", "menu");
+    createRenderProgram(gl, "menuProg", "vFullCanvas", "menu");
     
     getUniform(shaderProgs["menuProg"], "uMouse");
-    getUniform(shaderProgs["menuProg"], "menuData");
+    getUniform(shaderProgs["menuProg"], "menuDataTex");
     getUniform(shaderProgs["menuProg"], "background");
 
     const image = new Image();
@@ -93,13 +92,13 @@ function initMenu(){
 
 function drawMenu(time){
     clearBuffer();
-    const gl = glContext, program = shaderProgs["menuProg"];
+    const program = shaderProgs["menuProg"];
    
     gl.useProgram(program);
 
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, menuDataTexture);
-    gl.uniform1i(program.uniforms["menuData"], 0);
+    gl.uniform1i(program.uniforms["menuDataTex"], 0);
     
     gl.activeTexture(gl.TEXTURE1);
     gl.bindTexture(gl.TEXTURE_2D, gameTexture);
@@ -120,13 +119,13 @@ function drawMenu(time){
 }
 
 function gameStart(){
-    createRenderProgram(glContext, "camera", "camera", "camera");
-    createRenderProgram(glContext, "roomProg", "vShaderSource", "roomFSource");
-    createRenderProgram(glContext, "room16", "room16v", "room16f");
+    createRenderProgram(gl, "camera", "camera", "camera");
+    createRenderProgram(gl, "roomProg", "vShaderSource", "roomFSource");
+    createRenderProgram(gl, "room16", "room16v", "room16f");
     initMenu();
 
-    const frontCamPlane = glContext.createBuffer();
-    const frontPlane = glContext.createBuffer();
+    const frontCamPlane = gl.createBuffer();
+    const frontPlane = gl.createBuffer();
     shaderProgs['room16'].vBuff = frontCamPlane;
     shaderProgs["room16"].eBuff = frontPlane;
     const planeVert = [
@@ -137,37 +136,37 @@ function gameStart(){
     ];
     const planeConn = [0,1,2,0,2,3];
     shaderProgs['room16'].eLength = planeConn.length;
-    glContext.bindBuffer(glContext.ARRAY_BUFFER, frontCamPlane);
-    glContext.bufferData(glContext.ARRAY_BUFFER, new Float32Array(planeVert), glContext.STATIC_DRAW);
-    glContext.bindBuffer(glContext.ELEMENT_ARRAY_BUFFER, frontPlane);
-    glContext.bufferData(glContext.ELEMENT_ARRAY_BUFFER, new Uint16Array(planeConn), glContext.STATIC_DRAW);
+    gl.bindBuffer(gl.ARRAY_BUFFER, frontCamPlane);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(planeVert), gl.STATIC_DRAW);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, frontPlane);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(planeConn), gl.STATIC_DRAW);
 
 
     for(let i in cubes){
-        createRenderProgram(glContext, `cubeProg${i}`, "vShaderSource", "cubeFSource");
+        createRenderProgram(gl, `cubeProg${i}`, "vShaderSource", "cubeFSource");
 
         const cubeSize = [.2,.2,.2];
-        const cubeVBuff = glContext.createBuffer();
+        const cubeVBuff = gl.createBuffer();
         const cubeVPos = cubeVertex(cubes[i].p,cubeSize);
         cubes[i].s = cubeSize;
         cubes[i].b = cubeEdge(cubes[i].p,cubeSize);
-        glContext.bindBuffer(glContext.ARRAY_BUFFER, cubeVBuff);
-        glContext.bufferData(glContext.ARRAY_BUFFER, new Float32Array(cubeVPos.flat()), glContext.STATIC_DRAW);
+        gl.bindBuffer(gl.ARRAY_BUFFER, cubeVBuff);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(cubeVPos.flat()), gl.STATIC_DRAW);
         shaderProgs[`cubeProg${i}`].vBuff = cubeVBuff;
         shaderProgs[`cubeProg${i}`].eBuff = connectBuff;
         shaderProgs[`cubeProg${i}`].eLength = connect.length;
     }
 
-    const roomVBuff = glContext.createBuffer();
+    const roomVBuff = gl.createBuffer();
     const roomVPos = cubeVertex(room.p,room.s);
     room.b = cubeEdge(room.p,room.s);
-    glContext.bindBuffer(glContext.ARRAY_BUFFER, roomVBuff);
-    glContext.bufferData(glContext.ARRAY_BUFFER, new Float32Array(roomVPos.flat()), glContext.STATIC_DRAW);
+    gl.bindBuffer(gl.ARRAY_BUFFER, roomVBuff);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(roomVPos.flat()), gl.STATIC_DRAW);
     shaderProgs["roomProg"].vBuff = roomVBuff;
     shaderProgs[`roomProg`].eBuff = connectBuff;
     shaderProgs[`roomProg`].eLength = connect.length;
  
-    const cameraVBuff = glContext.createBuffer();
+    const cameraVBuff = gl.createBuffer();
     shaderProgs["camera"].vBuff = cameraVBuff;
     shaderProgs[`camera`].eBuff = connectBuff;
     shaderProgs[`camera`].eLength = connect.length;
@@ -200,12 +199,13 @@ function drawFrame(time){
     for(let i in shaderProgs){
         let currentProgram = shaderProgs[i];
 
+        if(i == "menuProg")continue;
         if(i == "camera" && cameraSettings.first_player){
             continue;
         } else if(i == "camera"){
             const camVPos = cubeVertex(worldCamPos,[.1,.1,.1]);
-            glContext.bindBuffer(glContext.ARRAY_BUFFER, currentProgram.vBuff);
-            glContext.bufferData(glContext.ARRAY_BUFFER, new Float32Array(camVPos.flat()), glContext.STATIC_DRAW);
+            gl.bindBuffer(gl.ARRAY_BUFFER, currentProgram.vBuff);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(camVPos.flat()), gl.STATIC_DRAW);
         }
 
         if(gameState.roomId < 0){
@@ -228,35 +228,39 @@ function drawFrame(time){
             lightPos[1] = 3;
         }
 
-        glContext.useProgram(currentProgram);
+        gl.useProgram(currentProgram);
 
-        glContext.bindBuffer(glContext.ARRAY_BUFFER, texCoordBuff);
-        glContext.enableVertexAttribArray(currentProgram.attribs["aTexCoord"]);
-        glContext.vertexAttribPointer(currentProgram.attribs["aTexCoord"], 2, glContext.FLOAT, false, 0, 0);
+        if(currentProgram.attribs["aTexCoord"] >= 0.){
+            gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuff);
+            gl.enableVertexAttribArray(currentProgram.attribs["aTexCoord"]);
+            gl.vertexAttribPointer(currentProgram.attribs["aTexCoord"], 2, gl.FLOAT, false, 0, 0);
+        }
 
-        glContext.bindBuffer(glContext.ARRAY_BUFFER, normalBuff);
-        glContext.enableVertexAttribArray(currentProgram.attribs["aSurfNormal"]);
-        glContext.vertexAttribPointer(currentProgram.attribs["aSurfNormal"], 3, glContext.FLOAT, false, 0, 0);
+        if(currentProgram.attribs["aSurfNormal"] >= 0.){
+            gl.bindBuffer(gl.ARRAY_BUFFER, normalBuff);
+            gl.enableVertexAttribArray(currentProgram.attribs["aSurfNormal"]);
+            gl.vertexAttribPointer(currentProgram.attribs["aSurfNormal"], 3, gl.FLOAT, false, 0, 0);
+        }
 
-        glContext.bindBuffer(glContext.ARRAY_BUFFER, currentProgram.vBuff);
-        glContext.enableVertexAttribArray(currentProgram.attribs["aWorldVertexPos"]);
-        glContext.vertexAttribPointer(currentProgram.attribs["aWorldVertexPos"], 3, glContext.FLOAT, false, 0, 0);
+        gl.bindBuffer(gl.ARRAY_BUFFER, currentProgram.vBuff);
+        gl.enableVertexAttribArray(currentProgram.attribs["aWorldVertexPos"]);
+        gl.vertexAttribPointer(currentProgram.attribs["aWorldVertexPos"], 3, gl.FLOAT, false, 0, 0);
 
-        glContext.uniformMatrix4fv(currentProgram.uniforms["uProjMat"], false, projMat);
-        glContext.uniformMatrix4fv(currentProgram.uniforms["invCamRot"], false, invCamRot );
-        glContext.uniformMatrix4fv(currentProgram.uniforms["uViewMat"], false, modelViewMat);
+        gl.uniformMatrix4fv(currentProgram.uniforms["uProjMat"], false, projMat);
+        gl.uniformMatrix4fv(currentProgram.uniforms["invCamRot"], false, invCamRot );
+        gl.uniformMatrix4fv(currentProgram.uniforms["uViewMat"], false, modelViewMat);
 
-        glContext.uniform3fv(currentProgram.uniforms["lightPos"], lightPos);
-        glContext.uniform3fv(currentProgram.uniforms["worldCamPos"], worldCamPos);
-        glContext.uniform3fv(currentProgram.uniforms["viewCamPos"], viewCamPos);
+        gl.uniform3fv(currentProgram.uniforms["lightPos"], lightPos);
+        gl.uniform3fv(currentProgram.uniforms["worldCamPos"], worldCamPos);
+        gl.uniform3fv(currentProgram.uniforms["viewCamPos"], viewCamPos);
 
-        glContext.uniform4f(currentProgram.uniforms["roomData"], gameState.roomId, cubeId, inverseColor, cameraSettings.first_player*1);
-        glContext.uniform2f(currentProgram.uniforms["resolution"], canvas.width, canvas.height);
+        gl.uniform4f(currentProgram.uniforms["roomData"], gameState.roomId, cubeId, inverseColor, cameraSettings.first_player*1);
+        gl.uniform2f(currentProgram.uniforms["resolution"], canvas.width, canvas.height);
 
-        glContext.uniform1f(currentProgram.uniforms["time"], time/1000);
+        gl.uniform1f(currentProgram.uniforms["time"], time/1000);
 
-        glContext.bindBuffer(glContext.ELEMENT_ARRAY_BUFFER, currentProgram.eBuff);
-        glContext.drawElements(glContext.TRIANGLES, currentProgram.eLength, glContext.UNSIGNED_SHORT, 0);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, currentProgram.eBuff);
+        gl.drawElements(gl.TRIANGLES, currentProgram.eLength, gl.UNSIGNED_SHORT, 0);
     }
 }
 
@@ -441,9 +445,12 @@ function render(time){
     );
 
     if(gameState.dispMenu){
-        glContext.bindFramebuffer(glContext.FRAMEBUFFER, gameFrameBuffer);
-        drawFrame(time);
-        glContext.bindFramebuffer(glContext.FRAMEBUFFER, null);
+        if(!gameState.renderMenuBg){
+            gl.bindFramebuffer(gl.FRAMEBUFFER, gameFrameBuffer);
+            drawFrame(time);
+            gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+            gameState.renderMenuBg = 1;
+        }
 
         drawMenu(time);
     } else {

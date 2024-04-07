@@ -5,7 +5,7 @@ uniform vec4 uMouse;
 uniform vec2 resolution;
 uniform float time;
 
-uniform sampler2D menuData;
+uniform sampler2D menuDataTex;
 // menudata
 // red => charset
 // green => charx
@@ -33,6 +33,18 @@ ivec2 getMenuPos(vec2 menu, vec2 centerCord){
     return ivec2(menu*45.) + ivec2(floor((centerCord*gridSize.x)/(gridSize.yx*45.))) + ivec2(0,29);
 }
 
+vec4 blur(sampler2D image, vec2 pos){
+    vec4 c = vec4(0);
+    float kernel[] = float[](1.,6.,15.,20.,15.,6.,1.);
+    for(int i = 0;i < 7;i++){
+        for(int j = 0; j < 7; j++){
+            c += texelFetch(background,ivec2(pos+vec2(i-3,j-3)),0)*(kernel[i]*kernel[j])/4096.;
+//            c += texture(background, (pos+vec2(i-3,j-3)*4.)/resolution)*(kernel[i]*kernel[j])/4096.;
+        }
+    }
+    return c;
+}
+
 void main(){
     vec2 res = resolution.xy;
     vec2 uv = (2. * gl_FragCoord.xy - res.xy)/res.y;
@@ -53,8 +65,8 @@ void main(){
         case 3: menu = how_to_play;
                 break;
     }
-    vec4 cp = texelFetch(menuData, getMenuPos(menu, sqFc), 0);
-    vec4 char = texture(menuData,(cp.gb*cp.a)+gridUv/16.);
+    vec4 cp = texelFetch(menuDataTex, getMenuPos(menu, sqFc), 0);
+    vec4 char = texture(menuDataTex,(cp.gb*cp.a)+gridUv/16.);
     bool pxInsideMenu = cp.a == 1.;
     bool menuSelect = charGrid.y == mouseGrid.y && abs(uMouse.x) <= 1. && pxInsideMenu && cp.r == 1.;
 
@@ -67,14 +79,7 @@ void main(){
         c += .3;
     }
 
-    vec3 bg = vec3(0);
-    float kernel[] = float[](1.,6.,15.,20.,14.,6.,1.);
-    for(int i = 0;i < 7;i++){
-        for(int j = 0; j < 7; j++){
-//            bg += texelFetch(background,ivec2((gl_FragCoord.xy+vec2(i-3,j-3))),0).rgb*(kernel[i]*kernel[j])/(64.*64.);
-            bg += texture(background,(gl_FragCoord.xy+vec2(i-3,j-3))/res).rgb*(kernel[i]*kernel[j])/(64.*64.);
-        }
-    }
+    vec3 bg = blur(background, gl_FragCoord.xy).rgb;
     c = c + bg*(1.-char.a)*.5;
 
     FragColor = vec4(c,1);

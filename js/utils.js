@@ -31,22 +31,22 @@ function getUniform(shaderProgram, label){
     if(shaderProgram.uniforms == undefined){
         shaderProgram.uniforms = {};
     }
-    shaderProgram.uniforms[label] = glContext.getUniformLocation(shaderProgram, label);
+    shaderProgram.uniforms[label] = gl.getUniformLocation(shaderProgram, label);
 }
 
 function getAttrib(shaderProgram, label){
     if(shaderProgram.attribs == undefined){
         shaderProgram.attribs = {};
     }
-    shaderProgram.attribs[label] = glContext.getAttribLocation(shaderProgram, label);
+    shaderProgram.attribs[label] = gl.getAttribLocation(shaderProgram, label);
 }
 
 function clearBuffer(){
-    glContext.clearColor(0,0,0,1);
-    glContext.clearDepth(1);
-    glContext.enable(glContext.DEPTH_TEST);
-    glContext.depthFunc(glContext.LEQUAL);
-    glContext.clear(glContext.COLOR_BUFFER_BIT | glContext.DEPTH_BUFFER_BIT);
+    gl.clearColor(0,0,0,1);
+    gl.clearDepth(1);
+    gl.enable(gl.DEPTH_TEST);
+    gl.depthFunc(gl.LEQUAL);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 }
 
 const shaderProgs = {};
@@ -57,5 +57,3 @@ function createRenderProgram(gl, name, vertexShaderName, fragmentShaderName){
     shaderProgs[name] = program;
     return program;
 }
-
-

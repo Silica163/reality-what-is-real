@@ -5,13 +5,12 @@ function max3(v){
 }
 
 const canvas = document.getElementById("webgl");
-let glContext = canvas.getContext("webgl2",{ preserveDrawingBuffer: true, alpha: true, depth: true, antialias: false});
-if(!glContext){
+let gl = canvas.getContext("webgl2",{ preserveDrawingBuffer: true, alpha: true, depth: true, antialias: false});
+if(!gl){
     logger("webgl 2.0 is not support.");
 }
-glContext.getExtension("EXT_shader_texture_lod");
+gl.getExtension("EXT_shader_texture_lod");
 let mouseObj = new Float32Array([0,0,0,0]);
-let pointer = 0;
 
 // mouse for in-game control
 let mouse = {x:0,y:0};
@@ -21,11 +20,19 @@ let run = false;
 const movement = {x:0,y:0,z:0};
 const lookAngle = {lr:0,ud:0};
 const gameState = {
+    renderMenuBg: 0,
     dispMenu: true,
     roomId: 0,
     room16: 0,
     bonus: 0,
 }
+
+const pointer = {
+    id:0,
+    lock: false,
+    enableLock: true,
+}
+
 const cameraSettings  = {
     y: .4,
     first_player: true,
@@ -63,8 +70,6 @@ mat4.translate(
     vec3.negate([0],viewCamPos),
 );
 
-let pointerLock = false;
-let enableLock = true;
 let intOffset = 0; 
 
 const logDiv = document.getElementById("log");
