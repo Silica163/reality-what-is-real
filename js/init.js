@@ -9,19 +9,21 @@ let gl = canvas.getContext("webgl2",{ preserveDrawingBuffer: true, alpha: true, 
 if(!gl){
     logger("webgl 2.0 is not support.");
 }
-gl.getExtension("EXT_shader_texture_lod");
-let mouseObj = new Float32Array([0,0,0,0]);
 
-// mouse for in-game control
+let mouseObj = new Float32Array([0,0,0,0]);
+let menuData = new Float32Array([0,-1,-1,-1]);
+
 let mouse = {x:0,y:0};
 const mouseSpeed = .7;
 let moveSpeed = .025;
 let run = false;
 const movement = {x:0,y:0,z:0};
 const lookAngle = {lr:0,ud:0};
+
 const gameState = {
     renderMenuBg: 0,
     dispMenu: true,
+    menuType: 0,
     roomId: 0,
     room16: 0,
     bonus: 0,
@@ -69,6 +71,16 @@ mat4.translate(
     camRotMat,
     vec3.negate([0],viewCamPos),
 );
+
+function gameReset(){
+    vec3.copy(worldCamPos,vec3.fromValues(0,.4,0));
+    mouse.x = 0;
+    mouse.y = 0;
+    gameState.room16 = 0;
+    gameState.roomId = 0;
+    gameState.bonus = 0;
+    gameState.renderMenuBg = 0;
+}
 
 let intOffset = 0; 
 

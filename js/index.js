@@ -28,6 +28,7 @@ function initMenu(){
     
     getUniform(shaderProgs["menuProg"], "uMouse");
     getUniform(shaderProgs["menuProg"], "menuDataTex");
+    getUniform(shaderProgs["menuProg"], "menuData");
     getUniform(shaderProgs["menuProg"], "background");
 
     const image = new Image();
@@ -109,6 +110,7 @@ function drawMenu(time){
     gl.vertexAttribPointer(program.attribs["aWorldVertexPos"], 2, gl.FLOAT, false, 0, 0);
 
     gl.uniform4fv(program.uniforms["uMouse"], mouseObj);
+    gl.uniform4fv(program.uniforms["menuData"], menuData);
     gl.uniform2f(program.uniforms["resolution"], canvas.width, canvas.height);
 
     gl.uniform1f(program.uniforms["time"], time/1000);
@@ -209,8 +211,7 @@ function drawFrame(time){
         }
 
         if(gameState.roomId < 0){
-            if(i == "room16"){
-            } else {
+            if(i != "room16"){
                 continue;
             }
         } else if( gameState.roomId >= 0 && i == "room16"){
