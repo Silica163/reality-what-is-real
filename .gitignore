@@ -1,4 +1,5 @@
 */*.xcf
 gentext.js
 text.txt
+update-zip.sh
 *.zip

@@ -1,17 +1,14 @@
+#version 300 es
 precision highp float;
 
 uniform vec4 roomData;
 uniform vec3 viewCamPos;
 uniform vec3 worldCamPos;
 uniform vec3 lightPos;
-uniform float time;
 
-varying vec4 vWorldPos;
-varying vec4 vScreenPos;
-varying vec3 surfNormal;
-varying vec3 surfPos;
-varying vec3 tmp;
-varying vec2 vUv;
+in vec4 vWorldPos;
+
+out vec4 FragColor;
 
 float arrow(vec2 uv){
     float c = 0.;
@@ -44,7 +41,7 @@ float phong(vec3 N, vec3 L, vec3 V, float k){
 }
 #define MAX 10.
 #define MIN .0001
-#define STEPS 128
+#define STEPS 64
 
 vec3 N = vec3(0);
 vec3 V = vec3(0);
@@ -157,5 +154,5 @@ void main(){
     } else if( mat == 0.){
         c = 0.;
     }
-    gl_FragColor = vec4(vec3(c),1);
+    FragColor = vec4(vec3(c),1);
 }

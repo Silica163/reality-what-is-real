@@ -35,6 +35,7 @@ function key2movement(keyCode,keyDown){
 
 document.addEventListener("keydown",control);
 document.addEventListener("keyup",control);
+
 function control(e){
     console.log(e.code);
     if(!e.defaultPrevented){

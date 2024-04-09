@@ -1,21 +1,16 @@
+#version 300 es
 precision highp float;
 
-uniform mat4 invCamRot;
-uniform mat4 uViewMat;
-uniform mat4 uProjMat;
 uniform vec4 roomData;
 uniform vec3 viewCamPos;
 uniform vec3 worldCamPos;
 uniform vec3 lightPos;
-uniform vec2 resolution;
-uniform float time;
 
-varying vec4 vWorldPos;
-varying vec4 vScreenPos;
-varying vec3 surfNormal;
-varying vec3 surfPos;
-varying vec3 tmp;
-varying vec2 vUv;
+in vec4 vWorldPos;
+in vec3 surfNormal;
+in vec2 vUv;
+
+out vec4 FragColor;
 
 float arrow(vec2 uv){
     float c = 0.;
@@ -148,5 +143,5 @@ void main(){
         c = vec3(1)*arrowPattern(vUv, 16.)/2.;
         c += blinnPhong(surfNormal, OL, V, 2.)/2.;
     }
-    gl_FragColor = vec4(c,1);
+    FragColor = vec4(c,1);
 }
