@@ -57,6 +57,7 @@ function menuClick(){
     const m = {x:mouseObj[0],y:mouseObj[1]};
     if(m > 1 || m < -1) return;
     m.y = floor(m.y*8)+8.;
+    if(!gameState.dispMenu)return;
     const btn = menuItems[gameState.menuType][m.y];
     switch(btn){
         case MENU_PLA:

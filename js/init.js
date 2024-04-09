@@ -80,6 +80,7 @@ function gameReset(){
     gameState.roomId = 0;
     gameState.bonus = 0;
     gameState.renderMenuBg = 0;
+    cameraSettings.first_player = true;
 }
 
 let intOffset = 0; 
