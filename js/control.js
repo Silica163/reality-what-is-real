@@ -88,9 +88,10 @@ canvas.addEventListener("pointermove",e => {
     updateMouseObj(e);
     if(document.pointerLockElement !== canvas) pointer.lock = false;
     if(pointer.lock || (e.buttons && (!pointer.enableLock)) ){
+        let mDir = pointer.enableLock? -1:1;
         if(!gameState.dispMenu){
-            mouse.x += e.movementX/canvas.height;
-            mouse.y += e.movementY/canvas.height;
+            mouse.x += (e.movementX * mouseSpeed * mDir)/canvas.height;
+            mouse.y += (e.movementY * mouseSpeed * mDir)/canvas.height;
             mouse.y = Math.min(1,Math.max(-1,mouse.y));
         }
     }

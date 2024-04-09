@@ -270,8 +270,8 @@ function render(time){
     camDirMovement[0] = movement.x;
     camDirMovement[2] = movement.z;
 
-    lookAngle.lr = mouse.x * PI * mouseSpeed;
-    lookAngle.ud = mouse.y * PI/Math.SQRT2 * mouseSpeed;
+    lookAngle.lr = mouse.x * PI ;
+    lookAngle.ud = mouse.y * PI/2. ;
 
     // move camera
     var camDirLen = Math.sqrt(camDirMovement[0]*camDirMovement[0] + camDirMovement[2]*camDirMovement[2]);
@@ -309,12 +309,12 @@ function render(time){
                         teleRoomCamPos = prevRoomTele[prevSide](worldCamPos);
                         switch(prevSide){
                             case 0:
-                                mouse.x += .5 / mouseSpeed;
+                                mouse.x += .5 ;
                                 break;
                             case 1:
                                 break;
                             case 2:
-                                mouse.x -= .5 / mouseSpeed;
+                                mouse.x -= .5 ;
                                 break;
                         } 
                     } else {
@@ -342,12 +342,12 @@ function render(time){
                     }
                     switch(roomSide){
                         case 0:
-                            mouse.x -= .5 / mouseSpeed;
+                            mouse.x -= .5 ;
                             break;
                         case 1:
                             break;
                         case 2:
-                            mouse.x += .5 / mouseSpeed;
+                            mouse.x += .5 ;
                             break;
                     }
                 }
@@ -399,12 +399,12 @@ function render(time){
                         teleRoomCamPos[0] = -2 + intOffset*1.5;
                         teleRoomCamPos[2] = -worldCamPos[0];
 
-                        mouse.x += .5/mouseSpeed;
+                        mouse.x += .5;
                     }
                     if(roomSide == 2){
                         teleRoomCamPos[0] = 2 - intOffset*1.5;
                         teleRoomCamPos[2] = worldCamPos[0];
-                        mouse.x -= .5/mouseSpeed;
+                        mouse.x -= .5;
                     }
                     gameState.bonus = 1;
                 }
