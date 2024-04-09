@@ -271,7 +271,7 @@ function render(time){
     camDirMovement[2] = movement.z;
 
     lookAngle.lr = mouse.x * PI * mouseSpeed;
-    lookAngle.ud = mouse.y * PI/Math.SQRT2 * mouseSpeed;
+    lookAngle.ud = mouse.y * PI/2 * mouseSpeed;
 
     // move camera
     var camDirLen = Math.sqrt(camDirMovement[0]*camDirMovement[0] + camDirMovement[2]*camDirMovement[2]);

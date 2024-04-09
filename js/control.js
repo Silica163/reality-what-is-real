@@ -89,9 +89,9 @@ canvas.addEventListener("pointermove",e => {
     if(document.pointerLockElement !== canvas) pointer.lock = false;
     if(pointer.lock || (e.buttons && (!pointer.enableLock)) ){
         if(!gameState.dispMenu){
-            mouse.x += e.movementX/canvas.height;
-            mouse.y += e.movementY/canvas.height;
-            mouse.y = Math.min(1,Math.max(-1,mouse.y));
+            mouse.x -= e.movementX/canvas.height;
+            mouse.y -= e.movementY/canvas.height;
+            mouse.y = Math.min(1,Math.max(-1,mouse.y*mouseSpeed))/mouseSpeed;
         }
     }
 });
