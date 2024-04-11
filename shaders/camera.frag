@@ -1,26 +1,12 @@
+#version 300 es
 precision highp float;
 uniform vec3 viewCamPos;
 uniform vec3 worldCamPos;
 uniform vec3 lightPos;
-uniform float time;
 
-varying vec4 vWorldPos;
+in vec4 vWorldPos;
 
-float arrow(vec2 uv){
-    float c = 0.;
-    uv.x = abs(uv.x);
-    c = min(max((uv.y - (1.-uv.x))*.5,-uv.y), max((uv.x-.5),abs(uv.y+.5)-.5));
-    return smoothstep(0.,.001,c);
-}
-
-float arrowPattern(vec2 uv, float scale){
-    uv *= scale;
-    float c = 0.;
-    vec2 id = floor(uv);
-    vec2 uf = fract(uv);
-    c = arrow(uf*2.-1.);
-    return c;
-}
+out vec4 FragColor;
 
 float diffuse(vec3 N, vec3 L){
     return clamp(dot(N,L),0.,1.);
@@ -61,7 +47,6 @@ void main(){
     }
 
     L = normalize(lightPos - rp);
-    V = normalize(rp - viewCamPos);
     N = normalize(rp - worldCamPos);
     
     float c = 0.;
@@ -69,5 +54,5 @@ void main(){
     c += phong(N,L,V,32.);
     c = c/3. + .3;
 
-    gl_FragColor = vec4(vec3(c),1);
+    FragColor = vec4(vec3(c),1);
 }

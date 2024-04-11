@@ -14,7 +14,7 @@ let mouseObj = new Float32Array([0,0,0,0]);
 let menuData = new Float32Array([0,-1,-1,-1]);
 
 let mouse = {x:0,y:0};
-const mouseSpeed = .3;
+const mouseSpeed = .5;
 let moveSpeed = .025;
 let run = false;
 const movement = {x:0,y:0,z:0};
