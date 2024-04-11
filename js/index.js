@@ -384,6 +384,11 @@ function render(time){
     if(gameState.roomId == -1){
         var roomInt = isPointOutsideBox(worldCamPos, room.b, room.p, intOffset);
         var floorInt = worldCamPos[1] < (intOffset);
+
+        if(floorInt){
+            worldCamPos[1] = intOffset;
+        }
+
         for(let i in roomInt.side){
 //            infoDivs0[i].innerText = roomInt.side[i];
             if(roomInt.side[i]){
@@ -415,21 +420,17 @@ function render(time){
                 }
 
 
-                if(!(goRoom0 || goRoom15)){
-                    worldCamPos[i%3] = room.b[i] + intOffset * (i < 3 ? 1 : -1);
-                } else {
+                if(goRoom0 || goRoom15){
                     worldCamPos[0] = teleRoomCamPos[0];
                     worldCamPos[1] = cameraSettings.y;
                     worldCamPos[2] = teleRoomCamPos[2];
+                } else { 
+                    worldCamPos[i%3] = room.b[i] + intOffset * (i < 3 ? 1 : -1);
                 }
 
                 gameState.roomId = roomId;
                 break;
             }
-        }
-
-        if(floorInt){
-            worldCamPos[1] = intOffset;
         }
     }
 
