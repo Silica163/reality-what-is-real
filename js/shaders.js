@@ -11,6 +11,7 @@ const fragmentShaderList = [
     "camera",
     "room16f",
     "menu",
+    "dialog"
 ];
 
 const vShaders = {};

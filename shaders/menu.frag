@@ -50,7 +50,7 @@ vec4 blur(sampler2D image, vec2 pos){
 void main(){
     vec2 res = resolution.xy;
     vec2 uv = (2. * gl_FragCoord.xy - res.xy)/res.y;
-    vec2 sqFc = (gl_FragCoord.xy - floor((res-res.y) / 2.));
+    vec2 menuFc = (uv*.5+.5)*720.;
 
     vec2 charGrid = floor(uv*gridSize);
     vec2 gridUv = (fract(uv*gridSize)-.5)*(gridSize.yx/gridSize.x)+.5;
@@ -69,7 +69,7 @@ void main(){
         case 4: menu = credit;
                 break;
     }
-    vec4 cp = texelFetch(menuDataTex, getMenuPos(menu, sqFc), 0);
+    vec4 cp = texelFetch(menuDataTex, getMenuPos(menu, menuFc), 0);
     vec4 char = texture(menuDataTex,(cp.gb*cp.a)+gridUv/16.);
     bool pxInsideMenu = cp.a == 1.;
     bool menuSelect = charGrid.y == mouseGrid.y && abs(uMouse.x) <= 1. && pxInsideMenu && cp.r == 1.;

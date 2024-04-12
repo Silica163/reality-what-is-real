@@ -24,7 +24,8 @@ const gameFrameBuffer = gl.createFramebuffer();
 const gameRenderBuffer = gl.createRenderbuffer();
 
 function initMenu(){
-    createRenderProgram(gl, "menuProg", "vFullCanvas", "menu");
+    createRenderProgram(gl, "menuProg", "vFullCanvas", "dialog");
+//    createRenderProgram(gl, "menuProg", "vFullCanvas", "menu");
     
     getUniform(shaderProgs["menuProg"], "uMouse");
     getUniform(shaderProgs["menuProg"], "menuDataTex");
