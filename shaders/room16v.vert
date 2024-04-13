@@ -8,12 +8,12 @@ uniform vec3 viewCamPos;
 
 out vec4 vWorldPos;
 
-in vec4 aWorldVertexPos;
+in vec4 aWorldVertex;
 in vec3 aSurfNormal;
 in vec2 aTexCoord;
 
 void main(){
-    gl_Position = uProjMat * aWorldVertexPos;
-    vWorldPos = (invCamRot * aWorldVertexPos) - vec4(-viewCamPos,0);
+    gl_Position = uProjMat * aWorldVertex;
+    vWorldPos = (invCamRot * aWorldVertex) - vec4(-viewCamPos,0);
 }
 

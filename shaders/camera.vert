@@ -6,10 +6,10 @@ uniform mat4 uProjMat;
 
 out vec4 vWorldPos;
 
-in vec4 aWorldVertexPos;
+in vec4 aWorldVertex;
 
 void main(){
-    gl_Position = uProjMat * uViewMat* aWorldVertexPos;
-    vWorldPos = aWorldVertexPos;
+    gl_Position = uProjMat * uViewMat* aWorldVertex;
+    vWorldPos = aWorldVertex;
 }
 

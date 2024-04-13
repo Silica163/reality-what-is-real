@@ -11,7 +11,7 @@ if(!gl){
 }
 
 let mouseObj = new Float32Array([0,0,0,0]);
-let menuData = new Float32Array([0,-1,-1,-1]);
+let menuData = new Float32Array([0,-1, 0,-1]);
 
 let mouse = {x:0,y:0};
 const mouseSpeed = .5;
@@ -23,6 +23,7 @@ const lookAngle = {lr:0,ud:0};
 const gameState = {
     renderMenuBg: 0,
     dispMenu: true,
+    dispDialog: false,
     menuType: 0,
     roomId: 0,
     room16: 0,
@@ -74,6 +75,7 @@ mat4.translate(
 
 function gameReset(){
     vec3.copy(worldCamPos,vec3.fromValues(0,.4,0));
+    vec4.copy(menuData,vec4.fromValues(0,-1,0,-1));
     mouse.x = 0;
     mouse.y = 0;
     gameState.room16 = 0;
@@ -81,6 +83,7 @@ function gameReset(){
     gameState.bonus = 0;
     gameState.renderMenuBg = 0;
     cameraSettings.first_player = true;
+    gameState.dispDialog = false;
 }
 
 let intOffset = 0; 

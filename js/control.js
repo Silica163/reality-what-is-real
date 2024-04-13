@@ -36,6 +36,8 @@ function key2movement(keyCode,keyDown){
 document.addEventListener("keydown",control);
 document.addEventListener("keyup",control);
 
+const DIALOG_BLANK = 19;
+
 function control(e){
     console.log(e.code);
     if(!e.defaultPrevented){
@@ -46,6 +48,10 @@ function control(e){
         } else {
             movement.x = 0;
             movement.z = 0;
+        }
+        
+        if(e.code == "Space" && !keyDown && gameState.dispDialog){
+            menuData[2] = menuData[2] + 1;
         }
 
         if(e.code == "KeyV" && !keyDown && control)cameraSettings.first_player = !cameraSettings.first_player;

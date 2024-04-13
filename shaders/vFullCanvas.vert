@@ -1,10 +1,9 @@
 #version 300 es
 precision highp float;
 
-// atribute vec4 aWorldVertexPos
-in vec4 aWorldVertexPos;
+in vec4 aWorldVertex;
 
 void main(){
-    gl_Position = aWorldVertexPos;
+    gl_Position = aWorldVertex;
 }
 

@@ -48,7 +48,7 @@ void main(){
     vec2 charGrid = floor(uv*gridSize);
     vec2 gridUv = (fract(uv*gridSize)-.5)*(gridSize.yx/gridSize.x) +.5;
    
-    ivec2 dialog = diagId2Pos(int(time)%30);
+    ivec2 dialog = diagId2Pos(int(menuData.z));
     ivec2 menuPos =  ivec2(floor(charGrid)) + ivec2(22,7);
     vec4 charPos = texelFetch(menuDataTex, dialog*45 + menuPos + ivec2(0,40), 0);
     vec4 char = texture(menuDataTex, charPos.gb + gridUv/16.)*charPos.a;
@@ -56,7 +56,7 @@ void main(){
     float diagBg = step(abs(uv.y+.5),.25);
     float drawDiag = diagBg*step(abs(uv.x),1.+6./16.);
 
-    vec3 c = blur(background, gl_FragCoord.xy).xyz * diagBg*.5 + 
+    vec3 c = blur(background, gl_FragCoord.xy).xyz * diagBg*.2 + 
              texelFetch(background, ivec2(gl_FragCoord.xy), 0).xyz * (1.-diagBg) + 
              diagBg*.4
     ;

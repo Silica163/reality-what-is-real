@@ -8,13 +8,13 @@ out vec4 vScreenPos;
 out vec3 surfNormal;
 out vec2 vUv;
 
-in vec4 aWorldVertexPos;
+in vec4 aWorldVertex;
 in vec3 aSurfNormal;
 in vec2 aTexCoord;
 
 void main(){
-    gl_Position = uProjMat * uViewMat* aWorldVertexPos;
-    vWorldPos = aWorldVertexPos;
+    gl_Position = uProjMat * uViewMat* aWorldVertex;
+    vWorldPos = aWorldVertex;
     vScreenPos = gl_Position;
     surfNormal = aSurfNormal;
     vUv = aTexCoord;

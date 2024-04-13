@@ -23,109 +23,21 @@ const gameTexture = gl.createTexture();
 const gameFrameBuffer = gl.createFramebuffer();
 const gameRenderBuffer = gl.createRenderbuffer();
 
-function initMenu(){
-    createRenderProgram(gl, "menuProg", "vFullCanvas", "dialog");
-//    createRenderProgram(gl, "menuProg", "vFullCanvas", "menu");
-    
-    getUniform(shaderProgs["menuProg"], "uMouse");
-    getUniform(shaderProgs["menuProg"], "menuDataTex");
-    getUniform(shaderProgs["menuProg"], "menuData");
-    getUniform(shaderProgs["menuProg"], "background");
-
-    const image = new Image();
-    image.onload = function(){
-        gl.bindTexture(gl.TEXTURE_2D, menuDataTexture);
-        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-        gl.texImage2D(
-            gl.TEXTURE_2D,
-            0,
-            gl.RGBA,
-            gl.RGBA,
-            gl.UNSIGNED_BYTE,
-            image
-        );
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-    }
-    image.src = "img/texture.png";
-   
-    gl.bindTexture(gl.TEXTURE_2D, gameTexture);
-    gl.texImage2D(
-        gl.TEXTURE_2D,
-        0,
-        gl.RGBA,
-        canvas.width,
-        canvas.height,
-        0,
-        gl.RGBA,
-        gl.UNSIGNED_BYTE,
-        null,
-    );
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-
-    gl.bindFramebuffer(gl.FRAMEBUFFER, gameFrameBuffer);
-    gl.bindRenderbuffer(gl.RENDERBUFFER, gameRenderBuffer);
-    gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, canvas.width, canvas.height);
-    gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, gameRenderBuffer);
-
-    gl.bindTexture(gl.TEXTURE_2D, gameTexture);
-    gl.framebufferTexture2D(
-        gl.FRAMEBUFFER, 
-        gl.COLOR_ATTACHMENT0, 
-        gl.TEXTURE_2D, 
-        gameTexture, 
-        0
-    ); 
-    const menuVertex = gl.createBuffer();
-    shaderProgs["menuProg"].vBuff = menuVertex;
-    gl.bindBuffer(gl.ARRAY_BUFFER, menuVertex);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, 1, 1, 1,-1,-1, 1,-1]), gl.STATIC_DRAW);
-
-    const menuIndics = gl.createBuffer();
-    shaderProgs["menuProg"].eLength = 6;
-    shaderProgs["menuProg"].eBuff = menuIndics;
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, menuIndics);
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array([0,1,2,1,3,2]), gl.STATIC_DRAW);
+function drawMenu(time){
+    drawText(time, "menu");
 }
 
-
-function drawMenu(time){
-    clearBuffer();
-    const program = shaderProgs["menuProg"];
-   
-    gl.useProgram(program);
-
-    gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, menuDataTexture);
-    gl.uniform1i(program.uniforms["menuDataTex"], 0);
-    
-    gl.activeTexture(gl.TEXTURE1);
-    gl.bindTexture(gl.TEXTURE_2D, gameTexture);
-    gl.uniform1i(program.uniforms["background"],1);
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, program.vBuff);
-    gl.enableVertexAttribArray(program.attribs["aWorldVertexPos"]);
-    gl.vertexAttribPointer(program.attribs["aWorldVertexPos"], 2, gl.FLOAT, false, 0, 0);
-
-    gl.uniform4fv(program.uniforms["uMouse"], mouseObj);
-    gl.uniform4fv(program.uniforms["menuData"], menuData);
-    gl.uniform2f(program.uniforms["resolution"], canvas.width, canvas.height);
-
-    gl.uniform1f(program.uniforms["time"], time/1000);
-
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, program.eBuff);
-    gl.drawElements(gl.TRIANGLES, program.eLength, gl.UNSIGNED_SHORT, 0);
- 
+function drawDialog(time){
+    // do something with time and roomId to choose dialog to display
+    drawText(time, "dialog");
 }
 
 function gameStart(){
     createRenderProgram(gl, "camera", "camera", "camera");
     createRenderProgram(gl, "roomProg", "vShaderSource", "roomFSource");
     createRenderProgram(gl, "room16", "room16v", "room16f");
-    initMenu();
+    initTextProg("menu");
+    initTextProg("dialog");
 
     const frontCamPlane = gl.createBuffer();
     const frontPlane = gl.createBuffer();
@@ -146,7 +58,7 @@ function gameStart(){
 
 
     for(let i in cubes){
-        createRenderProgram(gl, `cubeProg${i}`, "vShaderSource", "cubeFSource");
+        const shaderProg = createRenderProgram(gl, `cubeProg${i}`, "vShaderSource", "cubeFSource");
 
         const cubeSize = [.2,.2,.2];
         const cubeVBuff = gl.createBuffer();
@@ -155,9 +67,9 @@ function gameStart(){
         cubes[i].b = cubeEdge(cubes[i].p,cubeSize);
         gl.bindBuffer(gl.ARRAY_BUFFER, cubeVBuff);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(cubeVPos.flat()), gl.STATIC_DRAW);
-        shaderProgs[`cubeProg${i}`].vBuff = cubeVBuff;
-        shaderProgs[`cubeProg${i}`].eBuff = connectBuff;
-        shaderProgs[`cubeProg${i}`].eLength = connect.length;
+        shaderProg.vBuff = cubeVBuff;
+        shaderProg.eBuff = connectBuff;
+        shaderProg.eLength = connect.length;
     }
 
     const roomVBuff = gl.createBuffer();
@@ -186,7 +98,7 @@ function gameStart(){
         getUniform(currentProgram, "lightPos");
         getUniform(currentProgram, "roomData");
 
-        getAttrib(currentProgram, "aWorldVextexPos");
+        getAttrib(currentProgram, "aWorldVertex");
         getAttrib(currentProgram, "aSurfNormal");
         getAttrib(currentProgram, "aTexCoord");
     }
@@ -194,7 +106,7 @@ function gameStart(){
     window.requestAnimationFrame(render);
 }
 
-function drawFrame(time){
+function drawGame(time){
     let inverseColor = (gameState.roomId > 7) * 1;
 
     clearBuffer();
@@ -202,7 +114,7 @@ function drawFrame(time){
     for(let i in shaderProgs){
         let currentProgram = shaderProgs[i];
 
-        if(i == "menuProg")continue;
+        if(i == "menu" || i == "dialog")continue;
         if(i == "camera" && cameraSettings.first_player){
             continue;
         } else if(i == "camera"){
@@ -244,9 +156,11 @@ function drawFrame(time){
             gl.vertexAttribPointer(currentProgram.attribs["aSurfNormal"], 3, gl.FLOAT, false, 0, 0);
         }
 
-        gl.bindBuffer(gl.ARRAY_BUFFER, currentProgram.vBuff);
-        gl.enableVertexAttribArray(currentProgram.attribs["aWorldVertexPos"]);
-        gl.vertexAttribPointer(currentProgram.attribs["aWorldVertexPos"], 3, gl.FLOAT, false, 0, 0);
+        if(currentProgram.attribs["aWorldVertex"] >= 0.){
+            gl.bindBuffer(gl.ARRAY_BUFFER, currentProgram.vBuff);
+            gl.enableVertexAttribArray(currentProgram.attribs["aWorldVertex"]);
+            gl.vertexAttribPointer(currentProgram.attribs["aWorldVertex"], 3, gl.FLOAT, false, 0, 0);
+        }
 
         gl.uniformMatrix4fv(currentProgram.uniforms["uProjMat"], false, projMat);
         gl.uniformMatrix4fv(currentProgram.uniforms["invCamRot"], false, invCamRot );
@@ -456,18 +370,25 @@ function render(time){
 
     if(gameState.dispMenu){
         if(!gameState.renderMenuBg){
-            gl.bindFramebuffer(gl.FRAMEBUFFER, gameFrameBuffer);
-            drawFrame(time);
-            gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+            drawGame2Buffer(time);
             gameState.renderMenuBg = 1;
         }
 
         drawMenu(time);
+    } else if (gameState.dispDialog){
+        drawGame2Buffer(time);
+        drawDialog(time);
     } else {
-        drawFrame(time);
+        drawGame(time);
     }
     window.requestAnimationFrame(render);
 }
 
+function drawGame2Buffer(time){
+    gl.bindFramebuffer(gl.FRAMEBUFFER, gameFrameBuffer);
+    drawGame(time);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+}
+ 
 window.addEventListener("shaderloaded",gameStart);
 loadUrlShaders();
