@@ -11,7 +11,7 @@ uniform sampler2D menuDataTex;
 // red => charset
 // green => charx
 // blue => chary
-// alpha => 
+// alpha =>
 
 //charmap 
 // red clickable?
@@ -53,7 +53,7 @@ void main(){
     vec2 menuFc = (uv*.5+.5)*720.;
 
     vec2 charGrid = floor(uv*gridSize);
-    vec2 gridUv = (fract(uv*gridSize)-.5)*(gridSize.yx/gridSize.x)+.5;
+    vec2 gridUv = clamp((fract(uv*gridSize)-.5)*(gridSize.yx/gridSize.x)+.5,2./45.,1.);
     vec2 mouseGrid = floor(uMouse.xy*gridSize);
 
     vec2 menu = vec2(0);

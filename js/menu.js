@@ -1,4 +1,5 @@
 function toggleMenu(){
+    gameState.playing = true;
     gameState.dispMenu = !gameState.dispMenu;
     gameState.renderMenuBg = 0;
 }

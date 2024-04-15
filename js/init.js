@@ -20,9 +20,18 @@ let run = false;
 const movement = {x:0,y:0,z:0};
 const lookAngle = {lr:0,ud:0};
 
+const gameTime = {
+    delaySet: false,
+    now: 0,
+    startPlaying: 0,
+    dispDialog: 0,
+    lastChange: 0,
+}
+
 const gameState = {
     renderMenuBg: 0,
     dispMenu: true,
+    playing: false,
     dispDialog: false,
     menuType: 0,
     roomId: 0,
@@ -42,7 +51,7 @@ const cameraSettings  = {
     third_player_dist: .4,
     FOV: PI/1.7,
     aspect: canvas.width/canvas.height,
-    zNear: 0.1,
+    zNear: 0.01,
     zFar: 20,
 }
 
