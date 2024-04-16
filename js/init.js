@@ -1,8 +1,5 @@
 const { mat4, mat3, mat2, quat, quat2, vec2, vec3, vec4} = glMatrix;
 const { PI, abs, sign, max, sqrt, min, floor } = Math;
-function max3(v){
-    return max(v[0],max(v[1],v[2]));
-}
 
 const canvas = document.getElementById("webgl");
 let gl = canvas.getContext("webgl2",{ preserveDrawingBuffer: true, alpha: true, depth: true, antialias: false});
@@ -24,8 +21,6 @@ const gameTime = {
     delaySet: false,
     now: 0,
     startPlaying: 0,
-    dispDialog: 0,
-    lastChange: 0,
 }
 
 const gameState = {
@@ -93,6 +88,11 @@ function gameReset(){
     gameState.renderMenuBg = 0;
     cameraSettings.first_player = true;
     gameState.dispDialog = false;
+    menuData[2] = 0;
+    gameTime.now = 0;
+    gameTime.startPlaying = 0;
+    gameState.playing = false;
+    dialogReset();
 }
 
 let intOffset = 0; 

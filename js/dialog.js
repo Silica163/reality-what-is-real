@@ -44,10 +44,20 @@ const roomDiagData = {
 const diagDelays = {
     2:2000,
     4:1500,
+    3:500,
+    5:500,
+    7:500,
+    9:500,
     12:15000,
     14:1000,
     17:500,
 };
+
+function dialogReset(){
+    for(let i in roomDiagData){
+        roomDiagData[i].displayed = false;
+    }
+}
 
 function isDialogInRoom(diagId){
     let r = false;
@@ -95,21 +105,16 @@ function nextDialog(){
         if(dialogNow in diagDelays && !gameTime.delaySet){
             displayDelayDialog(diagDelays[dialogNow]);
         } else {
-            gameState.dispDialog = true;
             menuData[2] = dialogNow;
+            if(dialogNow == 6){
+                gameState.dispDialog = false;
+            } else {
+                gameState.dispDialog = true;
+            }
         }
     } else {
         completeDialogInRoom(gameState.roomId);
         gameState.dispDialog = false;
-    }
-    gameTime.lastChange = gameTime.now;
-}
-
-function toggleDialog(){
-    gameState.dispDialog = !gameState.dispDialog;
-    if(gameState.dispDialog){
-        gameTime.dispDialog = gameTime.now;
-        gameTime.lastChange = gameTime.now;
     }
 }
 
@@ -122,14 +127,13 @@ function delayDialog(ms){
 
     function nextDelay(){
         if(gameTime.delaySet){
-            toggleDialog();
             nextDialog();
             gameTime.delaySet = false;
         }
     }
 
     if(!delaySet){
-        toggleDialog();
+        gameState.dispDialog = false;
         gameTime.delaySet = true;
         gameTime.timeOut = setTimeout(nextDelay,ms);
     }
@@ -143,6 +147,5 @@ function blankDialog(){
 function roomChange(e){
     let oldRoomId = e.detail;
     completeDialogInRoom(oldRoomId);
-    gameState.dispDialog = false;
     nextDialog();
 }

@@ -54,6 +54,8 @@ function control(e){
         }
 
         if(e.code == "KeyV" && !keyDown && control)cameraSettings.first_player = !cameraSettings.first_player;
+        if(e.code == "KeyV" && !keyDown && control && !gameState.dispDialog && gameState.roomId == 8 && !cameraSettings.first_player)
+            gameState.dispDialog = true;
         if(e.code == "KeyN" && !keyDown && control)cameraSettings.first_player = !cameraSettings.first_player;
         if(e.code == "KeyM" && !keyDown ){
             if(pointer.lock){

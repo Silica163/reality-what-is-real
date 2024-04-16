@@ -183,6 +183,9 @@ function drawGame(time){
 
 function render(time){
     const oldRoomId = gameState.roomId;
+    if(gameState.roomId < 8 && gameState.room16 != 1){
+        cameraSettings.first_player = true;
+    }
     gameTime.now = time;
 
     camDirMovement[0] = movement.x;
@@ -389,9 +392,10 @@ function render(time){
         gameTime.startPlaying = time;
     }
 
-    if(time - gameTime.startPlaying >= 1500 && gameState.playing && !gameState.dispDialog && menuData[2] == 0){
-        gameState.dispDialog = true;
-        gameTime.dispDialog = time;
+    if(gameState.playing && !gameState.dispDialog && menuData[2] == 0){
+       setTimeout(()=>{
+           gameState.dispDialog = true;
+       }, 500);
     }
 
     drawFrame(time);
