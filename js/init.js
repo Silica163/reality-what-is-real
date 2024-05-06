@@ -93,6 +93,7 @@ function gameReset(){
     gameTime.startPlaying = 0;
     gameState.playing = false;
     dialogReset();
+    genMap();
 }
 
 let intOffset = 0; 

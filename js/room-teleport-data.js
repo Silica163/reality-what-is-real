@@ -24,15 +24,15 @@ let prevRoomTele = [
 
 let teleSide = [
     0,1,2,1,
-    2,1,2,1,
+    2,1,0,1,
     1,2,2,0,
-    0,1,2,2
+    0,1,0,2
 ];
 function genMap(){
     for(let i in teleSide){
-        let num = Math.round(Math.random()*100.) % 3;
+        let num = Math.floor(Math.random()*3);
         teleSide[i] = num;
     }
 }
 
-//genMap();
+genMap();
